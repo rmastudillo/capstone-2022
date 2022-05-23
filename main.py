@@ -94,7 +94,7 @@ N = ciw .create_network(
 
     service_distributions=[
         ciw.dists.Gamma(shape=27.34, scale=(1/298.77)),  # Adm
-        ciw.dists.Weibull(scale = 0.733, shape = 1.66),#Boxes
+        ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
         #ciw.dists.Lognormal(-0.541, 0.7205),
         ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp
 
@@ -218,7 +218,7 @@ if __name__ == '__main__':
         analisis_data_nodo_hosp.guardar_datos_replica(
             largo_cola_hosp, l_largo_hosp)
         largo_cola_opr101_011 = analisis_data_opr011.largo_cola_nodo()
-        #breakpoint()
+        # breakpoint()
         analisis_data_opr011.guardar_datos_replica(
             largo_cola_opr101_011, l_largo_opr101_011)
         largo_cola_opr102_001 = analisis_data_opr001.largo_cola_nodo()
@@ -264,5 +264,3 @@ if __name__ == '__main__':
         if trial in (50, 90, 100):
             Q.write_records_to_file(f'rep1_shared{trial}.csv', headers=True)
     breakpoint()
-            
-
