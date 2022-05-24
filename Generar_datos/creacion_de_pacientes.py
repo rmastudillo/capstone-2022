@@ -3,6 +3,8 @@ from collections import namedtuple
 from random import choices
 import csv
 """
+Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
+N_pacientes es el numero de pacientes a generar
 """
 N_pacientes = 10000
 """
