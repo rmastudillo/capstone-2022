@@ -1,7 +1,6 @@
 import pandas as pd
 
-otro = [0.00, 0.00, 0.02, 0.02, 0.01, 0.00, 0.03,
-        0.02, 0.04, 0.00, 0.06, 0.01, 0.29, 0.51]
+
 Matriz_sin_procesar = pd.read_csv(
     'matrizT.csv', encoding='UTF-8', sep=',').fillna(0).reset_index()
 Matriz_cambiofila = Matriz_sin_procesar.reindex(
@@ -29,3 +28,4 @@ for index, row in Matriz_cambiofila.iterrows():
         fila[-1] = 1.0
         fila[12] = 0.0
     Matriz_procesada.append(fila)
+print(Matriz_procesada)
