@@ -29,4 +29,5 @@ Matriz_original = np.array(Matriz_original).astype(float)
 Matriz_generada = np.array(Matriz_generada).astype(float)
 # Error cuadratico medio entre las matrices
 mse = ((Matriz_original - Matriz_generada)**2).mean()
-print(mse)
+print("Error cuadratico medio entre las matrices de transición =",
+      round(mse*100, 2), "%")

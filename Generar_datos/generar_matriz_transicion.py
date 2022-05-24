@@ -53,11 +53,8 @@ for row in data.iterrows():
     index += 1
 total = 0
 for boxes in codigos_otros:
-    print("{} Pacientes llegaron al lugar {}".format(
-        datos[boxes]['numero_arribos'], boxes))
     total += datos[boxes]['numero_arribos']
 datos['Otro']['numero_arribos'] = total
-print('Están incluidas las visitas repetidas')
 # Cuantos pacientes llegaron desde el area A al area B
 for boxes in codigos_interes:
     datos[boxes]['siguiente_destino_porcentual'] = defaultdict(dict)
