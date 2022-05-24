@@ -28,4 +28,3 @@ for index, row in Matriz_cambiofila.iterrows():
         fila[-1] = 1.0
         fila[12] = 0.0
     Matriz_procesada.append(fila)
-print(Matriz_procesada)

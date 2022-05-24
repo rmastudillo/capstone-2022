@@ -42,9 +42,6 @@ for boxes in codigos_interes:
         if lugares in codigos_interes:
             datos[boxes]['siguiente_destino_porcentual'][lugares] = round(
                 datos[boxes]['siguiente_destino'][lugares]/datos[boxes]['numero_arribos'], 3)
-            if lugares == 'Otro':
-                print(datos[boxes]
-                      ['siguiente_destino_porcentual'][lugares])
 
 
 fieldnames = ['Area'] + codigos_interes[:-1] + [codigos_interes[-1]]
