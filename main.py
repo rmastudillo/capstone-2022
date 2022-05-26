@@ -167,7 +167,7 @@ N = ciw .create_network(
 )
 
 warmtime = 500
-for trial in range(1000):
+for trial in range(100):
     ciw.seed(trial)
     Q = ciw.Simulation(N, node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
                        ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode], tracker=trackers.NodePopulation())
@@ -175,4 +175,18 @@ for trial in range(1000):
     Q.simulate_until_max_time(168*8 + warmtime)
     recs = Q.get_all_records()
 
-breakpoint()
+
+k = 90
+nodo = 0
+largo = 0
+for i in Q.nodes[-1].all_individuals:
+    if len(i.data_records) >= largo:
+        largo = len(i.data_records)
+        nodo = i
+
+print(nodo)
+for i in nodo.data_records:
+    print("Nodo=", i.node,
+          "arrival_date= ", i.arrival_date,
+          "waiting_time=", i.waiting_time,
+          "exit_date=", i.exit_date)
