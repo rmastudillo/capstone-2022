@@ -48,7 +48,7 @@ Defino función para elegir la ruta de los pacientes
 
 
 def repeating_route(ind):
-    index = int(str(ind)[-1])
+    index = int(str(ind)[11:])
     return pacientes[index].ruta_num[:-1]
 
 
@@ -158,7 +158,7 @@ N = ciw .create_network(
         ciw.dists.Normal(mean=2.39, sd=0.584),  # opr102_001 ; EXCL
         ciw.dists.Normal(mean=2.48, sd=0.54),  # opr101_033 ; Gral
         ciw.dists.Normal(mean=2.47, sd=0.46),  # opr102_003 ; Gral
-        ciw.dists.Deterministic(value=1)  # OTROS ;
+        ciw.dists.Deterministic(value=0)  # OTROS ;
     ],
 
     routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
@@ -167,10 +167,12 @@ N = ciw .create_network(
 )
 
 warmtime = 500
-for trial in range(100):
+for trial in range(1000):
     ciw.seed(trial)
     Q = ciw.Simulation(N, node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
                        ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode], tracker=trackers.NodePopulation())
     # Aca se calibra el programa
     Q.simulate_until_max_time(168*8 + warmtime)
     recs = Q.get_all_records()
+
+breakpoint()
