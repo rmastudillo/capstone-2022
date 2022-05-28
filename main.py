@@ -126,48 +126,57 @@ class CustomDistribution(Distribution):
                     a = True
             return b
 
+base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
+nueva_configuracion=[2,3,2,3,4,5,0,0,0,0,0,0,0]
+class Simulacion:
+    def __init__(self,nueva_configuracion,transi=500,horario=0):
+        self.nueva_configuracion = nueva_configuracion
+        self.transitorio = transi
+        self.horario = horario
+        self.estrucura = self.definir_estructura()
 
-N = ciw .create_network(
+    def definir_estructura(self):
+        N = ciw .create_network(
+           arrival_distributions=[
+                ciw.dists.Exponential(rate=(1)),  # Adm
+                ciw.dists.NoArrivals(),  # BOXES
+                ciw.dists.NoArrivals(),  # salas hosp 1
+                ciw.dists.NoArrivals(),  # salas hosp 2
+                ciw.dists.NoArrivals(),  # salas hosp 3
+                ciw.dists.NoArrivals(),  # salas hosp 4
+                ciw.dists.NoArrivals(),  # salas hosp 5
+                ciw.dists.NoArrivals(),  # salas hosp 6
+                ciw.dists.NoArrivals(),  # opr_urg
+                ciw.dists.NoArrivals(),  # opr_urg_lim
+                ciw.dists.NoArrivals(),  # opr_ urg_gen
+                ciw.dists.NoArrivals(),  # opr_urg_gen2
+                ciw.dists.NoArrivals()  # Otros
+            ],
+            service_distributions=[
+                ciw.dists.Gamma(shape=27.34, scale=(1/298.77)),  # Adm
+                ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp1
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp2
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp3
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp4
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp5
+                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp6
+                ciw.dists.Weibull(scale=2.55, shape=4.64),  # ] opr101_011 ; EXCL
+                ciw.dists.Normal(mean=2.39, sd=0.584),  # opr102_001 ; EXCL
+                ciw.dists.Normal(mean=2.48, sd=0.54),  # opr101_033 ; Gral
+                ciw.dists.Normal(mean=2.47, sd=0.46),  # opr102_003 ; Gral
+                ciw.dists.Deterministic(value=0)  # OTROS ;
+            ],
 
-    arrival_distributions=[
-        ciw.dists.Exponential(rate=(0.341)),  # Adm
-        ciw.dists.NoArrivals(),  # BOXES
-        ciw.dists.NoArrivals(),  # salas hosp 1
-        ciw.dists.NoArrivals(),  # salas hosp 2
-        ciw.dists.NoArrivals(),  # salas hosp 3
-        ciw.dists.NoArrivals(),  # salas hosp 4
-        ciw.dists.NoArrivals(),  # salas hosp 5
-        ciw.dists.NoArrivals(),  # salas hosp 6
-        ciw.dists.NoArrivals(),  # opr_urg
-        ciw.dists.NoArrivals(),  # opr_urg_lim
-        ciw.dists.NoArrivals(),  # opr_ urg_gen
-        ciw.dists.NoArrivals(),  # opr_urg_gen2
-        ciw.dists.NoArrivals()  # Otros
-    ],
+            routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
+                     ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing],
+            number_of_servers= [x + y for (x, y) in zip(base,nueva_configuracion)]
 
-    service_distributions=[
-        ciw.dists.Gamma(shape=27.34, scale=(1/298.77)),  # Adm
-        ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp1
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp2
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp3
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp4
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp5
-        ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp6
-        ciw.dists.Weibull(scale=2.55, shape=4.64),  # ] opr101_011 ; EXCL
-        ciw.dists.Normal(mean=2.39, sd=0.584),  # opr102_001 ; EXCL
-        ciw.dists.Normal(mean=2.48, sd=0.54),  # opr101_033 ; Gral
-        ciw.dists.Normal(mean=2.47, sd=0.46),  # opr102_003 ; Gral
-        ciw.dists.Deterministic(value=0)  # OTROS ;
-    ],
+        )
+        return N
 
-    routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
-             ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing],
-    number_of_servers=[3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-)
-
-warmtime = 500
-for trial in range(100):
+warmtime = 5000
+for trial in range(10):
     ciw.seed(trial)
     Q = ciw.Simulation(N, node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
                        ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode], tracker=trackers.NodePopulation())
@@ -190,3 +199,4 @@ for i in nodo.data_records:
           "arrival_date= ", i.arrival_date,
           "waiting_time=", i.waiting_time,
           "exit_date=", i.exit_date)
+breakpoint()
