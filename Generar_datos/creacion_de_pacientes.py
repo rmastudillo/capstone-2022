@@ -6,7 +6,7 @@ import csv
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar
 """
-N_pacientes = 10000
+N_pacientes = 800
 """
 """
 posibilidades = ['URG101_003', 'DIV101_703', 'DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107',
@@ -22,8 +22,8 @@ Agregando los supuestos de que todos pasan de admision al box y que de otro a sa
 """
 Matriz_procesada[0] = [0.0, 1, 0.0, 0.0, 0.0, 0.0,
                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+# Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+#                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 """
 Fin de agregación de supuestos
 """

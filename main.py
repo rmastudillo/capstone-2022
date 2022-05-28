@@ -126,18 +126,22 @@ class CustomDistribution(Distribution):
                     a = True
             return b
 
+
 base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-nueva_configuracion=[2,3,2,3,4,5,0,0,0,0,0,0,0]
+nueva_configuracion = np.zeros(13)
+
+
 class Simulacion:
-    def __init__(self,nueva_configuracion,transi=500,horario=0):
+    def __init__(self, nueva_configuracion, transi=500+168*8, horario=0):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.horario = horario
-        self.estrucura = self.definir_estructura()
+        self.N = self.definir_estructura()
+        self.res_ultima_sim = None
 
     def definir_estructura(self):
         N = ciw .create_network(
-           arrival_distributions=[
+            arrival_distributions=[
                 ciw.dists.Exponential(rate=(1)),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
@@ -161,7 +165,8 @@ class Simulacion:
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp4
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp5
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp6
-                ciw.dists.Weibull(scale=2.55, shape=4.64),  # ] opr101_011 ; EXCL
+                # ] opr101_011 ; EXCL
+                ciw.dists.Weibull(scale=2.55, shape=4.64),
                 ciw.dists.Normal(mean=2.39, sd=0.584),  # opr102_001 ; EXCL
                 ciw.dists.Normal(mean=2.48, sd=0.54),  # opr101_033 ; Gral
                 ciw.dists.Normal(mean=2.47, sd=0.46),  # opr102_003 ; Gral
@@ -170,21 +175,29 @@ class Simulacion:
 
             routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing],
-            number_of_servers= [x + y for (x, y) in zip(base,nueva_configuracion)]
+            number_of_servers=[int(x + y)
+                               for (x, y) in zip(base, nueva_configuracion)]
 
         )
         return N
 
-warmtime = 5000
-for trial in range(10):
-    ciw.seed(trial)
-    Q = ciw.Simulation(N, node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                       ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode], tracker=trackers.NodePopulation())
-    # Aca se calibra el programa
-    Q.simulate_until_max_time(168*8 + warmtime)
-    recs = Q.get_all_records()
+    def simular(self, rep=10):
+        for trial in range(rep):
+            ciw.seed(trial)
+            Q = ciw.Simulation(self.N,
+                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode],
+                               tracker=trackers.NodePopulation())
+            # Aca se calibra el programa
+            Q.simulate_until_max_time(self.transitorio)
+            recs = Q.get_all_records()
+        self.sim_Q = Q
+        self.res_ultima_sim = recs
 
 
+sim = Simulacion(nueva_configuracion)
 k = 90
 nodo = 0
 largo = 0
