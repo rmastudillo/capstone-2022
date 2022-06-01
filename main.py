@@ -1,4 +1,6 @@
 from bdb import Breakpoint
+from collections import defaultdict
+from email.policy import default
 from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
@@ -127,17 +129,40 @@ class CustomDistribution(Distribution):
             return b
 
 
-base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-nueva_configuracion = np.zeros(13)
-
-
 class Simulacion:
-    def __init__(self, nueva_configuracion, transi=500+168*8, horario=0):
+    """
+    nueva_configuracion = es el pi de variables de decisión
+    formato: lista
+
+    transi = es el periodo transiente en horas, por defecto son 30 días = 30*24 horas
+
+    horario = 0 significa que no se considera que se exitende el horario
+
+    tiempo_simulando es el tiempo en que corre la simulación desde que se termina el periodo transiente,
+    por defecto son 120 días
+
+    enfriamiento = es el tiempo en que va limpiando la simulación, es necesario para la librería,
+    no se considera en la recolección de datos
+    """
+
+    base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
+    espera_por_nodo = defaultdict(list)
+    espera_por_nodo_total = defaultdict(list)
+    espera_sim_por_nodo = []
+
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=30*24, horario=0, tiempo_simulando=120*24, enfriamiento=30*24):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
+        self.tiempo_simulando = tiempo_simulando
+        self.enfriamiento = enfriamiento
         self.horario = horario
+        self.tiempos_espera_simulacion = []
+        self.medias_simulacion = []
+        self.desviacion_standard = []
+        self.ultimasim = None
+        self.tiempo_total = self.transitorio + \
+            self.tiempo_simulando + self.enfriamiento
         self.N = self.definir_estructura()
-        self.res_ultima_sim = None
 
     def definir_estructura(self):
         N = ciw .create_network(
@@ -176,12 +201,16 @@ class Simulacion:
             routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing],
             number_of_servers=[int(x + y)
-                               for (x, y) in zip(base, nueva_configuracion)]
+                               for (x, y) in zip(self.base, self.nueva_configuracion)]
 
         )
         return N
 
     def simular(self, rep=10):
+        """
+        rep es el numero de veces que se hace la simulación
+        se recolectan los datos de cada simulación con la configuración dada
+        """
         for trial in range(rep):
             ciw.seed(trial)
             Q = ciw.Simulation(self.N,
@@ -191,25 +220,47 @@ class Simulacion:
                                            ciw.PSNode],
                                tracker=trackers.NodePopulation())
             # Aca se calibra el programa
-            Q.simulate_until_max_time(self.transitorio)
+            tiempo_simulando = self.transitorio + self.tiempo_simulando + self.enfriamiento
+            Q.simulate_until_max_time(tiempo_simulando)
             recs = Q.get_all_records()
-        self.sim_Q = Q
-        self.res_ultima_sim = recs
+
+            # guardo los tiempos de espera del sistema y los guardo por nodo
+            waits = []
+            for r in recs:
+                if (r.arrival_date > self.transitorio and
+                        r.arrival_date < self.tiempo_total-self.enfriamiento):
+                    waits.append(r.waiting_time)
+                    self.espera_por_nodo_total[str(
+                        r.node)].append(r.waiting_time)
+                    self.espera_por_nodo[str(r.node)].append(r.waiting_time)
+            self.espera_sim_por_nodo.append(self.espera_por_nodo)
+            self.espera_por_nodo = defaultdict(list)
+            # guardo los tiempos de espera del sistema
+            self.tiempos_espera_simulacion.append(waits)
+            # guardo las medias
+            mean_wait = np.mean(waits)
+            self.medias_simulacion.append(mean_wait)
+            # guardo desviacion
+            desviacion_standard = np.std(waits)
+            self.desviacion_standard.append(desviacion_standard)
+        self.ultimasim = Q
+
+    def cambiar_configuracion(self, nueva_config):
+        self.nueva_configuracion = nueva_config
+        self.definir_estructura()
+
+    def tem_por_nodo(self):
+        datos = defaultdict(dict)
+        for nodo in self.espera_por_nodo_total.keys():
+            datos[nodo]['media'] = np.mean(self.espera_por_nodo_total[nodo])
+            datos[nodo]['sd'] = np.std(self.espera_por_nodo_total[nodo])
+        print("Datos tiempo de espera por nodo en el total de las simulaciones")
+        for i in range(0, 14):
+            print("Nodo {} = ".format(i), datos[str(i)])
+        return datos
 
 
-sim = Simulacion(nueva_configuracion)
-k = 90
-nodo = 0
-largo = 0
-for i in Q.nodes[-1].all_individuals:
-    if len(i.data_records) >= largo:
-        largo = len(i.data_records)
-        nodo = i
-
-print(nodo)
-for i in nodo.data_records:
-    print("Nodo=", i.node,
-          "arrival_date= ", i.arrival_date,
-          "waiting_time=", i.waiting_time,
-          "exit_date=", i.exit_date)
+sim = Simulacion()
+sim.simular()
+sim.tem_por_nodo()
 breakpoint()
