@@ -131,6 +131,8 @@ class CustomDistribution(Distribution):
 
 class Simulacion:
     """
+    set up:
+
     nueva_configuracion = es el pi de variables de decisión
     formato: lista
 
@@ -146,19 +148,71 @@ class Simulacion:
     """
 
     base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-    espera_por_nodo = defaultdict(list)
-    espera_por_nodo_total = defaultdict(list)
-    espera_sim_por_nodo = []
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=30*24, horario=0, tiempo_simulando=120*24, enfriamiento=30*24):
+    """
+    Datos:
+    """
+    """
+    1)Sistema completo:
+    """
+    """
+        - Todos los nodos juntos cada trial:
+        historial_sistema es una lista con diccionarios que guarda
+        media y distribucion calculada de todo el sistema
+    """
+    historial_sistema = []
+    """
+        - Todos los nodos juntos cada simulacion:
+        historial_simulacion es una lista con diccionarios que guarda
+        media y distribucion calculada de todo el sistema conjunto en las 
+        n trials
+        
+    """
+    historial_simulacion = []
+
+    """
+    2)Sistema parcial por nodo:
+    """
+    """
+        - Todos los nodos separados en cada trial:
+        historial_sistema es una lista con diccionarios que guarda
+        media y distribucion calculada de todo el sistema
+        historial_sistema_nodos[num_simulacion][num_trial][nodo]
+        num_simulacion(int)
+        num_trial(int)
+        nodo(str(int))
+    """
+    historial_sistema_nodos = []
+    """
+        - Todos los nodos separados cada simulacion:
+        historial_simulacion es una lista con diccionarios que guarda
+        media y distribucion de cada nodo en todo el sistema conjunto en las 
+        n trials
+        historial_simulacion_nodos[num_simulacion][nodo]
+        num_simulacion(int)
+        nodo(str(int))
+    """
+    historial_simulacion_nodos = []
+
+    """
+    Transitorios 
+    """
+    espera_sim_por_nodo = defaultdict(lambda: defaultdict(list))
+
+    espera_por_nodo = defaultdict(list)
+
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=15*24, horario=0, tiempo_simulando=90*24, enfriamiento=15*24):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando
         self.enfriamiento = enfriamiento
         self.horario = horario
         self.tiempos_espera_simulacion = []
-        self.medias_simulacion = []
-        self.desviacion_standard = []
+        # Datos estadisticos
+        # Lista con la media del sistema
+        self.media_simulacion = int
+        # Lista con la desviacion del sistema
+        self.desviacion_standard = int
         self.ultimasim = None
         self.tiempo_total = self.transitorio + \
             self.tiempo_simulando + self.enfriamiento
@@ -167,7 +221,7 @@ class Simulacion:
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Exponential(rate=(1)),  # Adm
+                ciw.dists.Exponential(rate=(0.2)),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -211,6 +265,8 @@ class Simulacion:
         rep es el numero de veces que se hace la simulación
         se recolectan los datos de cada simulación con la configuración dada
         """
+        datos_tiempo = []
+        datos_trial = []
         for trial in range(rep):
             ciw.seed(trial)
             Q = ciw.Simulation(self.N,
@@ -225,39 +281,88 @@ class Simulacion:
             recs = Q.get_all_records()
 
             # guardo los tiempos de espera del sistema y los guardo por nodo
+            comienza_enfriamiento = self.tiempo_total-self.enfriamiento
             waits = []
             for r in recs:
-                if (r.arrival_date > self.transitorio and
-                        r.arrival_date < self.tiempo_total-self.enfriamiento):
-                    waits.append(r.waiting_time)
-                    self.espera_por_nodo_total[str(
+                if r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento:
+                    datos_tiempo.append(r.waiting_time)
+                    self.espera_por_nodo[str(
                         r.node)].append(r.waiting_time)
-                    self.espera_por_nodo[str(r.node)].append(r.waiting_time)
-            self.espera_sim_por_nodo.append(self.espera_por_nodo)
-            self.espera_por_nodo = defaultdict(list)
-            # guardo los tiempos de espera del sistema
-            self.tiempos_espera_simulacion.append(waits)
-            # guardo las medias
-            mean_wait = np.mean(waits)
-            self.medias_simulacion.append(mean_wait)
-            # guardo desviacion
-            desviacion_standard = np.std(waits)
-            self.desviacion_standard.append(desviacion_standard)
+                    self.espera_sim_por_nodo[str(trial)][str(
+                        r.node)].append(r.waiting_time)
+                    waits.append(r.waiting_time)
+
+            stadisticas = {"media": np.mean(waits),
+                           "sd": np.std(waits)}
+            datos_trial.append(stadisticas)
+
+        """
+        1) a)
+        """
+        self.historial_sistema.append(datos_trial)
+        """
+        1) b)
+        """
+        estadisticas_total = {"media": np.mean(
+            datos_tiempo), "sd": np.std(datos_tiempo)}
+
+        self.historial_simulacion.append(estadisticas_total)
+
+        """
+        2) a)
+        """
+        self.historial_simulacion_nodos.append(
+            self.tem_por_nodo(self.espera_por_nodo))
+
+        """
+        2) b)
+        """
+        lista_datos_trial = []
+        for i in range(0, rep):
+            lista_datos_trial.append(self.tem_por_nodo(
+                self.espera_sim_por_nodo[str(i)]))
+        self.historial_sistema_nodos.append(lista_datos_trial)
+
+        """
+        Registro media y desviacion para accede mas rapido
+        """
+        self.media_simulacion = np.mean(
+            datos_tiempo)
+        self.desviacion_standard = np.std(datos_tiempo)
+        """
+        Guardo la ultima trial para revisar a mano
+        """
         self.ultimasim = Q
 
     def cambiar_configuracion(self, nueva_config):
         self.nueva_configuracion = nueva_config
         self.definir_estructura()
+        self.reiniciar_registros()
 
-    def tem_por_nodo(self):
+    def tem_por_nodo(self, espera_nodo=espera_por_nodo):
         datos = defaultdict(dict)
-        for nodo in self.espera_por_nodo_total.keys():
-            datos[nodo]['media'] = np.mean(self.espera_por_nodo_total[nodo])
-            datos[nodo]['sd'] = np.std(self.espera_por_nodo_total[nodo])
-        print("Datos tiempo de espera por nodo en el total de las simulaciones")
-        for i in range(0, 14):
-            print("Nodo {} = ".format(i), datos[str(i)])
+        for nodo in espera_nodo.keys():
+            datos[nodo]['media'] = round(
+                np.mean(espera_nodo[nodo]), 4)
+            datos[nodo]['sd'] = round(
+                np.std(espera_nodo[nodo]), 4)
+        #print("Datos tiempo de espera por nodo en el total de las simulaciones")
+        # for i in range(1, 14):
+        #    print("Nodo {} = ".format(i), datos[str(i)])
         return datos
+
+    def print_datos_nodos(self, dict_nodos):
+        print(
+            "Datos tiempo de espera por nodo en el total de los trials en las simulaciones")
+        for i in range(1, 14):
+            print("Nodo {} = ".format(i), dict_nodos[str(i)])
+
+    def reiniciar_registros(self):
+        self.espera_sim_por_nodo = defaultdict(lambda: defaultdict(list))
+        self.espera_por_nodo = defaultdict(list)
+
+        self.desviacion_standard = 0
+        self.medias_simulacion = 0
 
 
 sim = Simulacion()
