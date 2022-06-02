@@ -38,7 +38,7 @@ class Paciente:
 
 
 rutas_sin_procesar = pd.read_csv(
-    my_path+'./pacientes_generados_ruta.csv', encoding='UTF-8', sep=',').fillna(0).reset_index()
+    my_path+'/pacientes_generados_ruta.csv', encoding='UTF-8', sep=',').fillna(0).reset_index()
 for index, row in rutas_sin_procesar.iterrows():
     num = ast.literal_eval(row['Num_area'])
     p = Paciente(index, row['Area'], num)
