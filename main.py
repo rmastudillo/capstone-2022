@@ -263,6 +263,45 @@ class Simulacion:
         )
         return N
 
+    def transciente(self):
+        """
+        Grafica el tiempo transciente 
+        """
+        Y_i_j = []
+        total_replica = 34
+        dias_sim = 300  # dias
+        t = 24
+        tiempo_simulando = t
+        for _replica in range(0, total_replica):
+            ciw.seed(_replica)
+            Q = ciw.Simulation(self.N,
+                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode],
+                               tracker=trackers.NodePopulation())
+            Y_i = []
+            for _i in range(1, dias_sim):
+                Q.simulate_until_max_time(tiempo_simulando)  # simula i dias
+                waits = []
+                recs = Q.get_all_records()
+                for r in recs:
+                    if r.node != 14:
+                        waits.append(r.waiting_time)
+                    else:
+                        print("ACAA")
+                # mi f(y) es el tiempo medio
+                Y_i.append(round(np.mean(waits), 3))
+                tiempo_simulando += t  # simulo otro día
+            tiempo_simulando = t
+            Y_i_j.append(Y_i)
+        Y_i_j = np.array(Y_i_j)
+        Y_bar_i = Y_i_j.mean(0)
+        Y_bar_i = np.around(Y_bar_i, decimals=3)
+
+
+        # guardo los tiempos de espera del sistema y los guardo por nodo
+
     def simular(self, rep=10):
         """
         rep es el numero de veces que se hace la simulación
@@ -287,7 +326,7 @@ class Simulacion:
             comienza_enfriamiento = self.tiempo_total-self.enfriamiento
             waits = []
             for r in recs:
-                if r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento:
+                if r.node != 14 and (r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento):
                     datos_tiempo.append(r.waiting_time)
                     self.espera_por_nodo[str(
                         r.node)].append(r.waiting_time)
@@ -369,6 +408,7 @@ class Simulacion:
 
 
 sim = Simulacion()
-sim.simular()
-sim.tem_por_nodo()
+sim.transciente()
+# sim.simular()
+# sim.tem_por_nodo()
 breakpoint()
