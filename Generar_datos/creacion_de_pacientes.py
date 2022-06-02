@@ -1,6 +1,7 @@
 from cargar_matriz import Matriz_procesada
 from collections import namedtuple
 from random import choices
+from tiempos_atencion import *
 import csv
 """
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
@@ -15,8 +16,10 @@ areas = {'URG101_003': [], 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [],
          'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
          'Otro': [], 'End': [],
          }
-
-
+t_atencion = {'URG101_003': t_urg101003, 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [], 'DIV102_203': [], 'DIV103_107': [],
+         'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
+         'Otro': [], 'End': [],
+         }
 """
 Agregando los supuestos de que todos pasan de admision al box y que de otro a salida
 """
@@ -42,13 +45,20 @@ def seleccionar_siguiente_paso(posibilidades, u_actual):
     camino_elegido = choices(posibilidades, weights=areas[u_actual][1], k=1)
     return camino_elegido[0]
 
+def calcular_tiempo_atencion(u_actual):
+    """
+    retorna el tiempo de atención en horas
+    """
+    
+    tiempo = 0
+    return tiempo
 
 def crear_pacientes(N_pacientes, posibilidades):
     pacientes = []
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
-            'Paciente', ['n_recorrido', 'i_recorrido'])
+            'Paciente', ['n_recorrido', 'i_recorrido','t_atencion'])
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
         while u_actual != 'End':
@@ -77,12 +87,12 @@ with open('pacientes_generados.csv', 'w', encoding='UTF8', newline="") as f:
             writer.writerow(contenido)
         _index += 1
 with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=['Case ID', 'Area', 'Num_area'])
+    writer = csv.DictWriter(f, fieldnames=['Case ID', 'Area', 'Num_area','Tiempo_atencion'])
     writer.writeheader()
     _index = 0
     for paciente in pacientes:
         contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
-                     'Num_area': paciente.i_recorrido}
+                     'Num_area': paciente.i_recorrido} #paciente.i_recorrido[:-1]}
 
         writer.writerow(contenido)
         _index += 1
