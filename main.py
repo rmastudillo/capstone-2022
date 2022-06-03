@@ -204,6 +204,8 @@ class Simulacion:
 
     espera_por_nodo = defaultdict(list)
 
+    Y_bar_i = np.array
+
     def __init__(self, nueva_configuracion=np.zeros(13), transi=15*24, horario=0, tiempo_simulando=90*24, enfriamiento=15*24):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
@@ -224,7 +226,7 @@ class Simulacion:
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Exponential(rate=(0.2)),  # Adm
+                ciw.dists.Exponential(rate=(1/3)),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -297,9 +299,20 @@ class Simulacion:
             Y_i_j.append(Y_i)
         Y_i_j = np.array(Y_i_j)
         Y_bar_i = Y_i_j.mean(0)
-        Y_bar_i = np.around(Y_bar_i, decimals=3)
+        self.Y_bar_i = np.around(Y_bar_i, decimals=3)
 
+    def Y_a(self, a):
+        Y_i_bar_a = np.array
+        m = len(self.Y_bar_i)
+        for i in range(1, m):  # para que considere el a
+            if i <= a:
+                top = i-1
+                s = -top
+            elif a+1 <= i <= m-a:
+                top = a
+                s = -a
 
+        pass
         # guardo los tiempos de espera del sistema y los guardo por nodo
 
     def simular(self, rep=10):
@@ -408,7 +421,7 @@ class Simulacion:
 
 
 sim = Simulacion()
-sim.transciente()
-# sim.simular()
+# sim.transciente()
+sim.simular()
 # sim.tem_por_nodo()
 breakpoint()
