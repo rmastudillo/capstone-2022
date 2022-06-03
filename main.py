@@ -1,6 +1,7 @@
 from bdb import Breakpoint
 from collections import defaultdict
 from email.policy import default
+from msilib import sequence
 from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
@@ -51,6 +52,8 @@ for index, row in rutas_sin_procesar.iterrows():
         p.hora_llegada = row['Tiempo_llegada']
         tiempos_de_llegada.append(row['Tiempo_llegada'])
     pacientes.append(p)
+ar = np.array(rutas_sin_procesar['DIV101_603']
+              [rutas_sin_procesar['DIV101_603'] != 0])
 pacientes = pacientes[:-1]
 tiempos_de_llegada = tiempos_de_llegada[:-1]
 
@@ -259,7 +262,7 @@ class Simulacion:
             service_distributions=[
                 ciw.dists.Gamma(shape=0.2, scale=(1/298.77)),  # Adm
                 ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp1
+                ciw.dists.Sequential(sequence=ar),  # salas hosp1
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp2
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp3
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp4

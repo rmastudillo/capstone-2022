@@ -30,7 +30,10 @@ t_atencion = {'URG101_003': t_urg101003,
               'OPR101_033': t_opr101033,
               'Otro': t_otro, 'End': t_end,
               }
-
+t_atencion_areas = {'URG101_003': [], 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [], 'DIV102_203': [], 'DIV103_107': [],
+                    'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
+                    'Otro': [], 'End': [],
+                    }
 """
 Agregando los supuestos de que todos pasan de admision al box y que de otro a salida
 """
@@ -77,13 +80,17 @@ def crear_pacientes(N_pacientes, posibilidades):
         tiempo = t_llegada_entre_pacientes()
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
-        paciente.t_atencion = [t_atencion[u_actual]()]
+        tiempo_atendido = t_atencion[u_actual]()
+        paciente.t_atencion = [tiempo_atendido]
+        t_atencion_areas[u_actual].append(tiempo_atendido)
         while u_actual != 'End':
             siguiente_destino = seleccionar_siguiente_paso(
                 posibilidades, u_actual)
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
-            paciente.t_atencion.append(t_atencion[siguiente_destino]())
+            tiempo_atendido = t_atencion[siguiente_destino]()
+            paciente.t_atencion.append(tiempo_atendido)
+            t_atencion_areas[siguiente_destino].append(tiempo_atendido)
             u_actual = siguiente_destino
         pacientes.append(paciente)
     return(pacientes)
@@ -115,3 +122,32 @@ with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f
 
         writer.writerow(contenido)
         _index += 1
+with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
+    writer = csv.DictWriter(
+        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada',
+                       'URG101_003',
+                       'DIV101_703',
+                       'DIV101_603',
+                       'DIV101_604',
+                       'DIV102_203',
+                       'DIV103_107',
+                       'DIV104_602',
+                       'DIV103_204',
+                       'OPR102_001',
+                       'OPR101_011',
+                       'OPR102_003',
+                       'OPR101_033',
+                       'Otro'
+                       ])
+    writer.writeheader()
+    _index = 0
+    for paciente in pacientes:
+        contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
+                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
+        for area in t_atencion_areas.keys():
+            if area != 'End' and _index < len(t_atencion_areas[area]):
+                contenido[area] = t_atencion_areas[area][_index]
+        writer.writerow(contenido)
+        _index += 1
+
+print(len(t_atencion_areas['URG101_003']))
