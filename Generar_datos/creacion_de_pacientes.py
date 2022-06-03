@@ -7,7 +7,7 @@ import csv
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar
 """
-N_pacientes = 800
+N_pacientes = 10000
 """
 """
 posibilidades = ['URG101_003', 'DIV101_703', 'DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107',
@@ -68,10 +68,13 @@ def calcular_tiempo_atencion(u_actual):
 
 def crear_pacientes(N_pacientes, posibilidades):
     pacientes = []
+    tiempo = 0
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
-            'Paciente', ['n_recorrido', 'i_recorrido', 't_atencion'])
+            'Paciente', ['n_recorrido', 'i_recorrido', 't_llegada', 't_atencion'])
+        paciente.t_llegada = tiempo
+        tiempo = t_llegada_entre_pacientes()
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
         paciente.t_atencion = [t_atencion[u_actual]()]
@@ -80,7 +83,6 @@ def crear_pacientes(N_pacientes, posibilidades):
                 posibilidades, u_actual)
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
-            print(siguiente_destino)
             paciente.t_atencion.append(t_atencion[siguiente_destino]())
             u_actual = siguiente_destino
         pacientes.append(paciente)
@@ -104,12 +106,12 @@ with open('pacientes_generados.csv', 'w', encoding='UTF8', newline="") as f:
         _index += 1
 with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
     writer = csv.DictWriter(
-        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion'])
+        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'])
     writer.writeheader()
     _index = 0
     for paciente in pacientes:
         contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
-                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion}  # paciente.i_recorrido[:-1]}
+                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
 
         writer.writerow(contenido)
         _index += 1

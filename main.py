@@ -23,15 +23,18 @@ Cargando los pacientes
 """
 pacientes = []
 
+tiempos_de_llegada = []
+
 
 class Paciente:
-    def __init__(self, id, ruta_id, ruta_num):
+    def __init__(self, id, ruta_id, ruta_num, ruta_time):
         self.id = id
         self.ruta_id = ruta_id
         self.ruta_num = ruta_num
         self.locacion_actual = None
         self.hora_llegada = None
         self.hora_salida = None
+        self.tiempo_atencion = ruta_time
 
     def __repr__(self):
         string = "Paciente num={}, ruta={}".format(self.id, self.ruta_id)
@@ -40,10 +43,16 @@ class Paciente:
 
 rutas_sin_procesar = pd.read_csv(
     my_path+'/pacientes_generados_ruta.csv', encoding='UTF-8', sep=',').fillna(0).reset_index()
+
 for index, row in rutas_sin_procesar.iterrows():
     num = ast.literal_eval(row['Num_area'])
-    p = Paciente(index, row['Area'], num)
+    p = Paciente(index, row['Area'], num, row['Tiempo_atencion'])
+    if not p.hora_llegada:
+        p.hora_llegada = row['Tiempo_llegada']
+        tiempos_de_llegada.append(row['Tiempo_llegada'])
     pacientes.append(p)
+pacientes = pacientes[:-1]
+tiempos_de_llegada = tiempos_de_llegada[:-1]
 
 """
 Pacientes cargados
@@ -206,6 +215,7 @@ class Simulacion:
     espera_por_nodo = defaultdict(list)
 
     Y_bar_i = np.array
+    _arrive_time = 0
 
     def __init__(self, nueva_configuracion=np.zeros(13), transi=15*24, horario=0, tiempo_simulando=90*24, enfriamiento=15*24):
         self.nueva_configuracion = nueva_configuracion
@@ -224,10 +234,15 @@ class Simulacion:
             self.tiempo_simulando + self.enfriamiento
         self.N = self.definir_estructura()
 
+    def arrive_time(self):
+        index = self._arrive_time
+        self._arrive_time += 1
+        return pacientes[index].hora_llegada
+
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Exponential(rate=(1/12)),  # Adm
+                ciw.dists.Sequential(sequence=tiempos_de_llegada),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -326,7 +341,6 @@ class Simulacion:
             tiempo_simulando = self.transitorio + self.tiempo_simulando + self.enfriamiento
             Q.simulate_until_max_time(tiempo_simulando)
             recs = Q.get_all_records()
-
             # guardo los tiempos de espera del sistema y los guardo por nodo
             comienza_enfriamiento = self.tiempo_total-self.enfriamiento
             waits = []
