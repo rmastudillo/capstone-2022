@@ -227,7 +227,7 @@ class Simulacion:
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Exponential(rate=(1/7.2)),  # Adm
+                ciw.dists.Exponential(rate=(1/12)),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -242,7 +242,7 @@ class Simulacion:
                 ciw.dists.NoArrivals()  # Otros
             ],
             service_distributions=[
-                ciw.dists.Gamma(shape=27.34, scale=(1/298.77)),  # Adm
+                ciw.dists.Gamma(shape=0.2, scale=(1/298.77)),  # Adm
                 ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp1
                 ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp2
@@ -259,7 +259,9 @@ class Simulacion:
             ],
 
             routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
-                     ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing],
+                     ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
+                     ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
+                     ciw.no_routing],
             number_of_servers=[int(x + y)
                                for (x, y) in zip(self.base, self.nueva_configuracion)]
 

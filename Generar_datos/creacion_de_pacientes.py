@@ -16,10 +16,21 @@ areas = {'URG101_003': [], 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [],
          'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
          'Otro': [], 'End': [],
          }
-t_atencion = {'URG101_003': t_urg101003, 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [], 'DIV102_203': [], 'DIV103_107': [],
-         'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
-         'Otro': [], 'End': [],
-         }
+t_atencion = {'URG101_003': t_urg101003,
+              'DIV101_703': t_div101703,
+              'DIV101_603': t_div101603,
+              'DIV101_604': t_div101604,
+              'DIV102_203': t_div102203,
+              'DIV103_107': t_div103107,
+              'DIV104_602': t_div104602,
+              'DIV103_204': t_div103204,
+              'OPR102_001': t_opr102001,
+              'OPR101_011': t_opr101011,
+              'OPR102_003': t_opr102003,
+              'OPR101_033': t_opr101033,
+              'Otro': t_otro, 'End': t_end,
+              }
+
 """
 Agregando los supuestos de que todos pasan de admision al box y que de otro a salida
 """
@@ -45,27 +56,32 @@ def seleccionar_siguiente_paso(posibilidades, u_actual):
     camino_elegido = choices(posibilidades, weights=areas[u_actual][1], k=1)
     return camino_elegido[0]
 
+
 def calcular_tiempo_atencion(u_actual):
     """
     retorna el tiempo de atención en horas
     """
-    
+
     tiempo = 0
     return tiempo
+
 
 def crear_pacientes(N_pacientes, posibilidades):
     pacientes = []
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
-            'Paciente', ['n_recorrido', 'i_recorrido','t_atencion'])
+            'Paciente', ['n_recorrido', 'i_recorrido', 't_atencion'])
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
+        paciente.t_atencion = [t_atencion[u_actual]()]
         while u_actual != 'End':
             siguiente_destino = seleccionar_siguiente_paso(
                 posibilidades, u_actual)
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
+            print(siguiente_destino)
+            paciente.t_atencion.append(t_atencion[siguiente_destino]())
             u_actual = siguiente_destino
         pacientes.append(paciente)
     return(pacientes)
@@ -87,12 +103,13 @@ with open('pacientes_generados.csv', 'w', encoding='UTF8', newline="") as f:
             writer.writerow(contenido)
         _index += 1
 with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=['Case ID', 'Area', 'Num_area','Tiempo_atencion'])
+    writer = csv.DictWriter(
+        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion'])
     writer.writeheader()
     _index = 0
     for paciente in pacientes:
         contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
-                     'Num_area': paciente.i_recorrido} #paciente.i_recorrido[:-1]}
+                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion}  # paciente.i_recorrido[:-1]}
 
         writer.writerow(contenido)
         _index += 1
