@@ -17,11 +17,11 @@ def t_llegada_entre_pacientes():
 
 
 def t_urg101003():
-    return 0.3
+    return 0.1
 
 
 def t_div101703():
-    return 0.3
+    return 0.2
 
 
 def t_div101603():
@@ -29,39 +29,39 @@ def t_div101603():
 
 
 def t_div101604():
-    return 0.3
+    return 0.4
 
 
 def t_div102203():
-    return 0.3
+    return 0.5
 
 
 def t_div103107():
-    return 0.3
+    return 0.6
 
 
 def t_div104602():
-    return 0.3
+    return 0.7
 
 
 def t_div103204():
-    return 0.3
+    return 0.8
 
 
 def t_opr102001():
-    return 0.3
+    return 0.9
 
 
 def t_opr101011():
-    return 0.3
+    return 0.11
 
 
 def t_opr102003():
-    return 0.3
+    return 0.12
 
 
 def t_opr101033():
-    return 0.3
+    return 0.13
 
 
 def t_otro():
@@ -74,6 +74,3 @@ def t_end():
 
 def random_gama():
     return np.random.gamma(shape=25.155, scale=4.542125)
-
-
-

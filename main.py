@@ -47,13 +47,13 @@ rutas_sin_procesar = pd.read_csv(
 
 for index, row in rutas_sin_procesar.iterrows():
     num = ast.literal_eval(row['Num_area'])
-    p = Paciente(index, row['Area'], num, row['Tiempo_atencion'])
+    n_time = ast.literal_eval(row['Tiempo_atencion'])
+    p = Paciente(index, row['Area'], num, n_time)
     if not p.hora_llegada:
         p.hora_llegada = row['Tiempo_llegada']
         tiempos_de_llegada.append(row['Tiempo_llegada'])
     pacientes.append(p)
-ar = np.array(rutas_sin_procesar['DIV101_603']
-              [rutas_sin_procesar['DIV101_603'] != 0])
+
 pacientes = pacientes[:-1]
 tiempos_de_llegada = tiempos_de_llegada[:-1]
 
@@ -68,6 +68,15 @@ Defino función para elegir la ruta de los pacientes
 def repeating_route(ind):
     index = int(str(ind)[11:])
     return pacientes[index].ruta_num[:-1]
+
+
+class Arrival_times(ciw.dists.Distribution):
+
+    def sample(self, t=None, ind=None):
+        index = int(str(ind)[11:])
+        tiempo = pacientes[index].tiempo_atencion[0]
+        pacientes[index].tiempo_atencion = pacientes[index].tiempo_atencion[1:]
+        return tiempo
 
 
 """
@@ -260,20 +269,20 @@ class Simulacion:
                 ciw.dists.NoArrivals()  # Otros
             ],
             service_distributions=[
-                ciw.dists.Gamma(shape=0.2, scale=(1/298.77)),  # Adm
-                ciw.dists.Weibull(scale=0.733, shape=1.66),  # Boxes
-                ciw.dists.Sequential(sequence=ar),  # salas hosp1
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp2
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp3
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp4
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp5
-                ciw.dists.Gamma(shape=0.43, scale=(1/0.0037)),  # salas hosp6
+                Arrival_times(),  # Adm
+                Arrival_times(),  # Boxes
+                Arrival_times(),  # salas hosp1
+                Arrival_times(),  # salas hosp2
+                Arrival_times(),  # salas hosp3
+                Arrival_times(),  # salas hosp4
+                Arrival_times(),  # salas hosp5
+                Arrival_times(),  # salas hosp6
                 # ] opr101_011 ; EXCL
-                ciw.dists.Weibull(scale=2.55, shape=4.64),
-                ciw.dists.Normal(mean=2.39, sd=0.584),  # opr102_001 ; EXCL
-                ciw.dists.Normal(mean=2.48, sd=0.54),  # opr101_033 ; Gral
-                ciw.dists.Normal(mean=2.47, sd=0.46),  # opr102_003 ; Gral
-                ciw.dists.Deterministic(value=0)  # OTROS ;
+                Arrival_times(),
+                Arrival_times(),  # opr102_001 ; EXCL
+                Arrival_times(),  # opr101_033 ; Gral
+                Arrival_times(),  # opr102_003 ; Gral
+                Arrival_times()  # OTROS ;
             ],
 
             routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
@@ -325,7 +334,7 @@ class Simulacion:
         plt.ylabel('some numbers')
         plt.show()
 
-    def simular(self, rep=10):
+    def simular(self, rep=2):
         """
         rep es el numero de veces que se hace la simulación
         se recolectan los datos de cada simulación con la configuración dada
@@ -359,6 +368,14 @@ class Simulacion:
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
             datos_trial.append(stadisticas)
+
+            """
+            Reinicio la info de los pacientes
+            """
+            for index, row in rutas_sin_procesar.iterrows():
+                n_time = ast.literal_eval(row['Tiempo_atencion'])
+                if index < len(pacientes):
+                    pacientes[index].tiempo_atencion = n_time
 
         """
         1) a)
