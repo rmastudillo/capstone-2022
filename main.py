@@ -14,6 +14,7 @@ from optparse import OptionParser
 import inspect
 import ast
 import os
+from media_movil import media_movil_ayudantia
 
 my_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -226,7 +227,7 @@ class Simulacion:
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Exponential(rate=(1/3)),  # Adm
+                ciw.dists.Exponential(rate=(1/7.2)),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -271,7 +272,7 @@ class Simulacion:
         """
         Y_i_j = []
         total_replica = 34
-        dias_sim = 300  # dias
+        dias_sim = 700  # dias
         t = 24
         tiempo_simulando = t
         for _replica in range(0, total_replica):
@@ -300,20 +301,9 @@ class Simulacion:
         Y_i_j = np.array(Y_i_j)
         Y_bar_i = Y_i_j.mean(0)
         self.Y_bar_i = np.around(Y_bar_i, decimals=3)
-
-    def Y_a(self, a):
-        Y_i_bar_a = np.array
-        m = len(self.Y_bar_i)
-        for i in range(1, m):  # para que considere el a
-            if i <= a:
-                top = i-1
-                s = -top
-            elif a+1 <= i <= m-a:
-                top = a
-                s = -a
-
-        pass
-        # guardo los tiempos de espera del sistema y los guardo por nodo
+        plt.plot(media_movil_ayudantia(self.Y_bar_i, 3))
+        plt.ylabel('some numbers')
+        plt.show()
 
     def simular(self, rep=10):
         """
