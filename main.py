@@ -229,7 +229,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=15*24, horario=0, tiempo_simulando=90*24, enfriamiento=15*24):
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*60, horario=0, tiempo_simulando=24*120, enfriamiento=24*60):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando
@@ -334,7 +334,7 @@ class Simulacion:
         plt.ylabel('some numbers')
         plt.show()
 
-    def simular(self, rep=2):
+    def simular(self, rep=1):
         """
         rep es el numero de veces que se hace la simulación
         se recolectan los datos de cada simulación con la configuración dada
@@ -350,8 +350,8 @@ class Simulacion:
                                            ciw.PSNode],
                                tracker=trackers.NodePopulation())
             # Aca se calibra el programa
-            tiempo_simulando = self.transitorio + self.tiempo_simulando + self.enfriamiento
-            Q.simulate_until_max_time(tiempo_simulando)
+
+            Q.simulate_until_max_time(self.tiempo_total)
             recs = Q.get_all_records()
             # guardo los tiempos de espera del sistema y los guardo por nodo
             comienza_enfriamiento = self.tiempo_total-self.enfriamiento

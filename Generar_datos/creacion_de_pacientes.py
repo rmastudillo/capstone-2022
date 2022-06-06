@@ -3,6 +3,8 @@ from collections import namedtuple
 from random import choices
 from tiempos_atencion import *
 import csv
+
+
 """
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar
@@ -72,12 +74,19 @@ def calcular_tiempo_atencion(u_actual):
 def crear_pacientes(N_pacientes, posibilidades):
     pacientes = []
     tiempo = 0
+    tpo_actual_aux = 0
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
             'Paciente', ['n_recorrido', 'i_recorrido', 't_llegada', 't_atencion'])
-        paciente.t_llegada = tiempo
-        tiempo = t_llegada_entre_pacientes()
+        # Aca, se genera un intervalo de tiempo entre llegadas, segun la hora actual
+        tiempo = t_llegada_entre_pacientes(tpo_actual_aux)
+        paciente.t_llegada = tiempo  # Aca, se le asigna la hora de llegada al paciente
+        # Aqui, avanzaremos la variable auxiliar de tpo actual, para decidir cuando cambiar la tasa de atencion.
+        tpo_actual_aux += tiempo
+        # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
+        # en otro caso, la otra tasa
+
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
         tiempo_atendido = t_atencion[u_actual]()
@@ -124,29 +133,13 @@ with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f
         _index += 1
 with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
     writer = csv.DictWriter(
-        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada',
-                       'URG101_003',
-                       'DIV101_703',
-                       'DIV101_603',
-                       'DIV101_604',
-                       'DIV102_203',
-                       'DIV103_107',
-                       'DIV104_602',
-                       'DIV103_204',
-                       'OPR102_001',
-                       'OPR101_011',
-                       'OPR102_003',
-                       'OPR101_033',
-                       'Otro'
+        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'
                        ])
     writer.writeheader()
     _index = 0
     for paciente in pacientes:
         contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
                      'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
-        for area in t_atencion_areas.keys():
-            if area != 'End' and _index < len(t_atencion_areas[area]):
-                contenido[area] = t_atencion_areas[area][_index]
         writer.writerow(contenido)
         _index += 1
 

@@ -83,6 +83,11 @@ for boxes in codigos_otros:
             datos[boxes]['siguiente_destino_porcentual'][lugares] = round(
                 datos[boxes]['siguiente_destino'][lugares]/datos[boxes]['numero_arribos'], 3)
 fieldnames = ['Area'] + codigos_interes[:-1] + ['Otro'] + [codigos_interes[-1]]
+
+
+
+
+
 with open('matrizT.csv', 'w', encoding='UTF8', newline="") as f:
     writer = csv.DictWriter(f, fieldnames=fieldnames)
     writer.writeheader()
