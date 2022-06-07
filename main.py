@@ -229,7 +229,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*60, horario=0, tiempo_simulando=24*120, enfriamiento=24*60):
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30*12, horario=0, tiempo_simulando=24*30*24, enfriamiento=24*30*8):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando

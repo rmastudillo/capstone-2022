@@ -18,44 +18,44 @@ def t_llegada_entre_pacientes(tpo_actual_aux):
     """Ahora, recibe tpo_actual_aux, el cual en base al tiempo actual de llegada """
     if tpo_actual_aux % 24 < 7.0:  # Hora valle
         # parametro para horario entre 00 y 6:59, calculado con ventana de 16 horas
-        return round(np.random.exponential(7.3112745), 4)
+        return round(np.random.exponential(7.31), 3)
 
     else:
         # parametro para horario entre 7 y 23:59
-        return round(np.random.exponential(3.93550), 4)
+        return round(np.random.exponential(3.935), 3)
 
 
 def t_urg101003():
     # --> scale = 1/rate.
-    return round(np.random.gamma(shape=27.33998, scale=0.003347065), 4)
+    return round(np.random.gamma(shape=27.33998, scale=0.003347065), 3)
 
 
 def t_div101703():
-    return round(np.random.gamma(shape=2.289, scale=0.2999213), 4)
+    return round(np.random.gamma(shape=2.289, scale=0.2999213))
 
 
 def t_div101603():
-    return 0.3
+    return 306
 
 
 def t_div101604():
-    return 0.4
+    return 240
 
 
 def t_div102203():
-    return 0.5
+    return 45
 
 
 def t_div103107():
-    return 0.6
+    return 200
 
 
 def t_div104602():
-    return 0.7
+    return 200
 
 
 def t_div103204():
-    return 0.8
+    return 68
 
 
 def t_opr102001():
