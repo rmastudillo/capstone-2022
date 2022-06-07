@@ -1,15 +1,27 @@
+from pydoc import cram
 from cargar_matriz import Matriz_procesada
 from collections import namedtuple
 from random import choices
 from tiempos_atencion import *
 import csv
-
+import os
 
 """
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
-N_pacientes es el numero de pacientes a generar
+N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-N_pacientes = 10000
+N_pacientes = 100
+N_bdd = 20
+
+"""
+Crear carpetas
+"""
+
+dir_path = os.path.dirname(os.path.realpath(__file__))+"\Pacientes_sim"
+dir_path_old = os.path.dirname(os.path.realpath(__file__))+"\Pacientes_old"
+os.makedirs(dir_path, exist_ok=True)
+os.makedirs(dir_path_old, exist_ok=True)
+
 """
 """
 posibilidades = ['URG101_003', 'DIV101_703', 'DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107',
@@ -62,13 +74,18 @@ def seleccionar_siguiente_paso(posibilidades, u_actual):
     return camino_elegido[0]
 
 
-def calcular_tiempo_atencion(u_actual):
+def uniquify(path):
     """
-    retorna el tiempo de atención en horas
+    Retorna un nuevo path para que se creen los pacientes
     """
+    filename, extension = os.path.splitext(path)
+    counter = 1
 
-    tiempo = 0
-    return tiempo
+    while os.path.exists(path):
+        path = filename[:-1] + str(counter) + extension
+        counter += 1
+
+    return path
 
 
 def crear_pacientes(N_pacientes, posibilidades):
@@ -105,42 +122,34 @@ def crear_pacientes(N_pacientes, posibilidades):
     return(pacientes)
 
 
-pacientes = crear_pacientes(N_pacientes, posibilidades)
+def crear_bdd(N_pacientes, N_bdd):
+    for _i in range(0, N_bdd):
+        pacientes = crear_pacientes(N_pacientes, posibilidades)
+        with open(uniquify(dir_path_old+'\pacientes_generados_0.csv'), 'w', encoding='UTF8', newline="") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=['Case ID', 'Area', 'Num_area'])
+            writer.writeheader()
+            _index = 0
+            for paciente in pacientes:
+                recorridos = paciente.n_recorrido
+                _i = 0
+                for recorrido in recorridos:
+                    contenido = {'Case ID': _index, 'Area': recorrido,
+                                 'Num_area': paciente.i_recorrido[_i]}
+                    _i += 1
+                    writer.writerow(contenido)
+                _index += 1
+        with open(uniquify(dir_path+'\pacientes_generados_ruta_0.csv'), 'w', encoding='UTF8', newline="") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'])
+            writer.writeheader()
+            _index = 0
+            for paciente in pacientes:
+                contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
+                             'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
 
-with open('pacientes_generados.csv', 'w', encoding='UTF8', newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=['Case ID', 'Area', 'Num_area'])
-    writer.writeheader()
-    _index = 0
-    for paciente in pacientes:
-        recorridos = paciente.n_recorrido
-        _i = 0
-        for recorrido in recorridos:
-            contenido = {'Case ID': _index, 'Area': recorrido,
-                         'Num_area': paciente.i_recorrido[_i]}
-            _i += 1
-            writer.writerow(contenido)
-        _index += 1
-with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
-    writer = csv.DictWriter(
-        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'])
-    writer.writeheader()
-    _index = 0
-    for paciente in pacientes:
-        contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
-                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
+                writer.writerow(contenido)
+                _index += 1
 
-        writer.writerow(contenido)
-        _index += 1
-with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f:
-    writer = csv.DictWriter(
-        f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'
-                       ])
-    writer.writeheader()
-    _index = 0
-    for paciente in pacientes:
-        contenido = {'Case ID': _index, 'Area': paciente.n_recorrido,
-                     'Num_area': paciente.i_recorrido, 'Tiempo_atencion': paciente.t_atencion[:-1], 'Tiempo_llegada': paciente.t_llegada}  # paciente.i_recorrido[:-1]}
-        writer.writerow(contenido)
-        _index += 1
 
-print(len(t_atencion_areas['URG101_003']))
+crear_bdd(N_pacientes, N_bdd)
