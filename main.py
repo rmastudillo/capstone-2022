@@ -32,9 +32,7 @@ class Paciente:
         self.id = id
         self.ruta_id = ruta_id
         self.ruta_num = ruta_num
-        self.locacion_actual = None
         self.hora_llegada = None
-        self.hora_salida = None
         self.tiempo_atencion = ruta_time
 
     def __repr__(self):
@@ -55,6 +53,7 @@ for index, row in rutas_sin_procesar.iterrows():
     pacientes.append(p)
 
 pacientes = pacientes[:-1]
+print(tiempos_de_llegada[-1])
 tiempos_de_llegada = tiempos_de_llegada[:-1]
 
 """
@@ -65,7 +64,7 @@ Defino función para elegir la ruta de los pacientes
 """
 
 
-def repeating_route(ind):
+def define_route(ind):
     index = int(str(ind)[11:])
     return pacientes[index].ruta_num[:-1]
 
@@ -81,77 +80,6 @@ class Arrival_times(ciw.dists.Distribution):
 
 """
 """
-
-
-class Distribution(object):
-    """
-    A general distribution from which all other distirbutions will inherit.
-    """
-
-    def __repr__(self):
-        return 'Distribution'
-
-    def sample(self, t=None, ind=None):
-        pass
-
-    def _sample(self, t=None, ind=None):
-        """
-        Performs vaildity checks before sampling.
-        """
-        s = self.sample(t=t, ind=ind)
-        if (isinstance(s, float) or isinstance(s, int)) and s >= 0:
-            return s
-        else:
-            raise ValueError('Invalid time sampled.')
-
-    def __add__(self, dist):
-        """
-        Add two distributions such that sampling is the sum of the samples.
-        """
-        return CombinedDistribution(self, dist, add)
-
-    def __sub__(self, dist):
-        """
-        Subtract two distributions such that sampling is the difference of the samples.
-        """
-        return CombinedDistribution(self, dist, sub)
-
-    def __mul__(self, dist):
-        """
-        Multiply two distributions such that sampling is the product of the samples.
-        """
-        return CombinedDistribution(self, dist, mul)
-
-    def __truediv__(self, dist):
-        """
-        Divide two distributions such that sampling is the ratio of the samples.
-        """
-        return CombinedDistribution(self, dist, truediv)
-
-
-class CustomDistribution(Distribution):
-    def __init__(self):
-        self.__init__ = super().__init__
-        pass
-
-    def sample(self, t=None, ind=None):
-        prob = random.random()
-        if prob <= 0.79:
-            a = False
-            while a == False:
-                b = random.gammavariate(5.76, 1/0.016)
-                if b > 100 and b < 400:
-                    a = True
-
-            return b
-
-        elif 0.79 < prob:
-            a = False
-            while not a:
-                b = random.gammavariate(5.76, 1/0.016)
-                if b > 100 and b < 400:
-                    a = True
-            return b
 
 
 class Simulacion:
@@ -285,7 +213,7 @@ class Simulacion:
                 Arrival_times()  # OTROS ;
             ],
 
-            routing=[repeating_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
+            routing=[define_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing],
