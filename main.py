@@ -53,7 +53,6 @@ for index, row in rutas_sin_procesar.iterrows():
     pacientes.append(p)
 
 
-
 """
 Pacientes cargados
 """
@@ -68,11 +67,13 @@ def define_route(ind):
 
 
 class Service_times(ciw.dists.Distribution):
+    def __init__(self):
+        self.nodo = defaultdict(int)
 
     def sample(self, t=None, ind=None):
-        index = int(str(ind)[11:])
-        tiempo = pacientes[index].tiempo_atencion[0]
-        pacientes[index].tiempo_atencion = pacientes[index].tiempo_atencion[1:]
+        index = int(str(ind)[11:]) - 1 # Esto es porque la simulacion parte con ind=1
+        tiempo = pacientes[index].tiempo_atencion[self.nodo[index]]
+        self.nodo[index] += 1
         return tiempo
 
 
@@ -81,11 +82,10 @@ class Arrival_time(ciw.dists.Distribution):
         self.ind = 0
 
     def sample(self, t=None, ind=None):
-        print(t,ind)
         index = self.ind
         self.ind += 1
         tiempo = pacientes[index].hora_llegada
-        return round(tiempo,4)
+        return round(tiempo, 4)
 
 
 """
@@ -390,6 +390,9 @@ sim = Simulacion()
 # sim.transciente()
 sim.simular()
 recs = sim.ultimasim.get_all_records()
-arrival = [r.arrival_date for r in recs if r.node == 1]
+arrival = [[r.arrival_date,r.id_number] for r in recs if r.node == 1]
+arrival_1 = [[r.service_time, r.id_number] for r in recs if r.node == 1]
+print(arrival)
+print(arrival_1)
 # sim.tem_por_nodo()
 breakpoint()
