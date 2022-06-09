@@ -439,11 +439,11 @@ class Simulacion:
         Grafica el tiempo transciente 
         """
         Y_i_j = []
-        total_replica = 34
-        dias_sim = 700  # dias
+        total_replica = 1
+        dias_sim = 24*30*10  # dias
         t = 24
         tiempo_simulando = t
-        for _replica in range(0, total_replica):
+        for _replica in range(total_replica):
             ciw.seed(_replica)
             Q = ciw.Simulation(self.N,
                                node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
@@ -483,4 +483,15 @@ sim.simular(rep=2)
 # Una nueva simulacion NO DEBE TENER INI
 recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()
+a = [r.arrival_date for r in sim.recs if r.node == 1]
+a.sort()
+
+c = [a[i+1]-a[i] for i in range(len(a)-1)]
+
+l = sim.ultimasim.get_all_records()
+
+l_serv = [i.service_time for i in l if i.node == 1]
+
+
+
 breakpoint()
