@@ -1,7 +1,6 @@
 from bdb import Breakpoint
 from collections import defaultdict
 from email.policy import default
-from msilib import sequence
 from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
@@ -55,7 +54,7 @@ for index, row in rutas_sin_procesar.iterrows():
     pacientes.append(p)
 
 pacientes = pacientes[:-1]
-tiempos_de_llegada = tiempos_de_llegada[:-1]
+
 
 """
 Pacientes cargados
@@ -64,11 +63,9 @@ Pacientes cargados
 Defino función para elegir la ruta de los pacientes
 """
 
-
 def repeating_route(ind):
     index = int(str(ind)[11:])
     return pacientes[index].ruta_num[:-1]
-
 
 class Arrival_times(ciw.dists.Distribution):
 
@@ -79,79 +76,10 @@ class Arrival_times(ciw.dists.Distribution):
         return tiempo
 
 
+
 """
 """
 
-
-class Distribution(object):
-    """
-    A general distribution from which all other distirbutions will inherit.
-    """
-
-    def __repr__(self):
-        return 'Distribution'
-
-    def sample(self, t=None, ind=None):
-        pass
-
-    def _sample(self, t=None, ind=None):
-        """
-        Performs vaildity checks before sampling.
-        """
-        s = self.sample(t=t, ind=ind)
-        if (isinstance(s, float) or isinstance(s, int)) and s >= 0:
-            return s
-        else:
-            raise ValueError('Invalid time sampled.')
-
-    def __add__(self, dist):
-        """
-        Add two distributions such that sampling is the sum of the samples.
-        """
-        return CombinedDistribution(self, dist, add)
-
-    def __sub__(self, dist):
-        """
-        Subtract two distributions such that sampling is the difference of the samples.
-        """
-        return CombinedDistribution(self, dist, sub)
-
-    def __mul__(self, dist):
-        """
-        Multiply two distributions such that sampling is the product of the samples.
-        """
-        return CombinedDistribution(self, dist, mul)
-
-    def __truediv__(self, dist):
-        """
-        Divide two distributions such that sampling is the ratio of the samples.
-        """
-        return CombinedDistribution(self, dist, truediv)
-
-
-class CustomDistribution(Distribution):
-    def __init__(self):
-        self.__init__ = super().__init__
-        pass
-
-    def sample(self, t=None, ind=None):
-        prob = random.random()
-        if prob <= 0.79:
-            a = False
-            while a == False:
-                b = random.gammavariate(5.76, 1/0.016)
-                if b > 100 and b < 400:
-                    a = True
-
-            return b
-
-        elif 0.79 < prob:
-            a = False
-            while not a:
-                b = random.gammavariate(5.76, 1/0.016)
-                if b > 100 and b < 400:
-                    a = True
-            return b
 
 
 class Simulacion:
@@ -229,7 +157,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30*12, horario=0, tiempo_simulando=24*30*24, enfriamiento=24*30*8):
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30, horario=0, tiempo_simulando=24*30*10, enfriamiento= 0):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando
@@ -242,8 +170,7 @@ class Simulacion:
         # Lista con la desviacion del sistema
         self.desviacion_standard = int
         self.ultimasim = None
-        self.tiempo_total = self.transitorio + \
-            self.tiempo_simulando + self.enfriamiento
+        self.tiempo_total = self.transitorio + self.tiempo_simulando + self.enfriamiento
         self.N = self.definir_estructura()
 
     def arrive_time(self):
@@ -290,9 +217,7 @@ class Simulacion:
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing],
             number_of_servers=[int(x + y)
-                               for (x, y) in zip(self.base, self.nueva_configuracion)]
-
-        )
+                               for (x, y) in zip(self.base, self.nueva_configuracion)])
         return N
 
     def transciente(self):
@@ -300,11 +225,11 @@ class Simulacion:
         Grafica el tiempo transciente 
         """
         Y_i_j = []
-        total_replica = 34
-        dias_sim = 700  # dias
+        total_replica = 1
+        dias_sim = 24*30*10  # dias
         t = 24
         tiempo_simulando = t
-        for _replica in range(0, total_replica):
+        for _replica in range(total_replica):
             ciw.seed(_replica)
             Q = ciw.Simulation(self.N,
                                node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
@@ -353,6 +278,7 @@ class Simulacion:
 
             Q.simulate_until_max_time(self.tiempo_total)
             recs = Q.get_all_records()
+            self.recs = recs
             # guardo los tiempos de espera del sistema y los guardo por nodo
             comienza_enfriamiento = self.tiempo_total-self.enfriamiento
             waits = []
@@ -427,6 +353,7 @@ class Simulacion:
                 np.mean(espera_nodo[nodo]), 4)
             datos[nodo]['sd'] = round(
                 np.std(espera_nodo[nodo]), 4)
+                
         #print("Datos tiempo de espera por nodo en el total de las simulaciones")
         # for i in range(1, 14):
         #    print("Nodo {} = ".format(i), datos[str(i)])
@@ -450,4 +377,15 @@ sim = Simulacion()
 # sim.transciente()
 sim.simular()
 # sim.tem_por_nodo()
+a = [r.arrival_date for r in sim.recs if r.node == 1]
+a.sort()
+
+c = [a[i+1]-a[i] for i in range(len(a)-1)]
+
+l = sim.ultimasim.get_all_records()
+
+l_serv = [i.service_time for i in l if i.node == 1]
+
+
+
 breakpoint()
