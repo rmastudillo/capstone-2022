@@ -62,7 +62,8 @@ Defino función para elegir la ruta de los pacientes
 
 
 def define_route(ind):
-    index = int(str(ind)[11:])
+    index = int(str(ind)[11:]) - 1 
+    print(pacientes[index].ruta_num[:-1])
     return pacientes[index].ruta_num[:-1]
 
 
