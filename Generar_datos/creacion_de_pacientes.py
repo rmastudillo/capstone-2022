@@ -41,8 +41,9 @@ Agregando los supuestos de que todos pasan de admision al box y que de otro a sa
 """
 Matriz_procesada[0] = [0.0, 1, 0.0, 0.0, 0.0, 0.0,
                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-#                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+
 """
 Fin de agregación de supuestos
 """
@@ -86,6 +87,9 @@ def crear_pacientes(N_pacientes, posibilidades):
         tpo_actual_aux += tiempo
         # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
         # en otro caso, la otra tasa
+ 
+        l_tpo_pers = ['OPR102_001', 'OPR101_011', 'OPR102_003', 'OPR101_033', 'DIV103_204', 'DIV101_703']
+        l_hosp = ['DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107', 'DIV104_602', 'DIV103_204']
 
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
@@ -93,11 +97,26 @@ def crear_pacientes(N_pacientes, posibilidades):
         paciente.t_atencion = [tiempo_atendido]
         t_atencion_areas[u_actual].append(tiempo_atendido)
         while u_actual != 'End':
+            print(f"act: { u_actual}")
             siguiente_destino = seleccionar_siguiente_paso(
-                posibilidades, u_actual)
+                posibilidades, u_actual) # u_actual = OPR, sgt sala hosp
+            print(f"sgte{siguiente_destino}")
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
-            tiempo_atendido = t_atencion[siguiente_destino]()
+
+            if siguiente_destino in l_hosp:
+                act = u_actual
+                print(act)
+                print(f"sgte: {siguiente_destino}")
+                if act in l_tpo_pers:
+                    tiempo_atendido = t_atencion[siguiente_destino](act)
+
+                else:
+                    tiempo_atendido = t_atencion[siguiente_destino]()
+
+            else:
+                tiempo_atendido = t_atencion[siguiente_destino]()
+
             paciente.t_atencion.append(tiempo_atendido)
             t_atencion_areas[siguiente_destino].append(tiempo_atendido)
             u_actual = siguiente_destino
@@ -144,3 +163,7 @@ with open('pacientes_generados_ruta.csv', 'w', encoding='UTF8', newline="") as f
         _index += 1
 
 print(len(t_atencion_areas['URG101_003']))
+
+
+
+
