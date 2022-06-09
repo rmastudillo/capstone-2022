@@ -52,9 +52,7 @@ for index, row in rutas_sin_procesar.iterrows():
         tiempos_de_llegada.append(row['Tiempo_llegada'])
     pacientes.append(p)
 
-pacientes = pacientes[:-1]
-print(tiempos_de_llegada[-1])
-tiempos_de_llegada = tiempos_de_llegada[:-1]
+
 
 """
 Pacientes cargados
@@ -83,10 +81,11 @@ class Arrival_time(ciw.dists.Distribution):
         self.ind = 0
 
     def sample(self, t=None, ind=None):
+        print(t,ind)
         index = self.ind
         self.ind += 1
         tiempo = pacientes[index].hora_llegada
-        return tiempo
+        return round(tiempo,4)
 
 
 """
