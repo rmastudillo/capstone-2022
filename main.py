@@ -392,7 +392,10 @@ class Simulacion:
         for i in range(0, rep):
             lista_datos_trial.append(self.tem_por_nodo(
                 self.espera_sim_por_nodo[str(i)]))
-        self.historial_simulacion_nodos.append(lista_datos_trial)
+        if ini == 0:
+            self.historial_simulacion_nodos.append(lista_datos_trial)
+        else:
+            self.historial_simulacion_nodos[self.simulacion_actual]=lista_datos_trial
 
         """
         Registro media y desviacion para accede mas rapido
