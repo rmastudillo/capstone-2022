@@ -217,9 +217,9 @@ class Simulacion:
         self.tiempos_espera_simulacion = []
         # Datos estadisticos
         # Lista con la media del sistema
-        self.media_simulacion = int
+        self.mean = int
         # Lista con la desviacion del sistema
-        self.desviacion_standard = int
+        self.sd = int
         self.paciente = 0
 
     def cargar_pacientes(self,n_bdd):
@@ -400,9 +400,9 @@ class Simulacion:
         """
         Registro media y desviacion para accede mas rapido
         """
-        self.media_simulacion = np.mean(
+        self.mean = np.mean(
             self.datos_tiempo)
-        self.desviacion_standard = np.std(self.datos_tiempo)
+        self.sd = np.std(self.datos_tiempo)
         """
         Guardo la ultima trial para revisar a mano
         """
@@ -478,6 +478,7 @@ sim = Simulacion()
 # sim.transciente()
 sim.simular(rep=1)
 sim.simular(ini=1,rep=2)
+breakpoint()
 sim.simular(rep=2)
 # Una nueva simulacion NO DEBE TENER INI
 recs = sim.Q.get_all_records()
