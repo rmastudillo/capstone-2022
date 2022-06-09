@@ -11,7 +11,7 @@ Cada vez que se corra este codigo se van a crear dos archivos con los pacientes 
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
 N_pacientes = 10000
-N_bdd = 1
+N_bdd = 20
 
 """
 Crear carpetas
@@ -113,17 +113,14 @@ def crear_pacientes(N_pacientes, posibilidades):
         paciente.t_atencion = [tiempo_atendido]
         t_atencion_areas[u_actual].append(tiempo_atendido)
         while u_actual != 'End':
-            print(f"act: { u_actual}")
             siguiente_destino = seleccionar_siguiente_paso(
                 posibilidades, u_actual) # u_actual = OPR, sgt sala hosp
-            print(f"sgte{siguiente_destino}")
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
 
             if siguiente_destino in l_hosp:
                 act = u_actual
-                print(act)
-                print(f"sgte: {siguiente_destino}")
+
                 if act in l_tpo_pers:
                     tiempo_atendido = t_atencion[siguiente_destino](act)
 

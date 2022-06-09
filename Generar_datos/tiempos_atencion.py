@@ -237,15 +237,6 @@ def random_gama():
 
 
 
-if __name__ == "__main__":
-    l = []
-    for i in range(1000):
-        x = dist_desde_div101_703()
-        l.append(x)
-    
-    print(l)
-    breakpoint()
-        
 
 
 
