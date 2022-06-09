@@ -62,7 +62,7 @@ Defino función para elegir la ruta de los pacientes
 
 
 def define_route(ind):
-    index = int(str(ind)[11:]) - 1 
+    index = int(str(ind)[11:]) - 1
     print(pacientes[index].ruta_num[:-1])
     return pacientes[index].ruta_num[:-1]
 
@@ -72,7 +72,8 @@ class Service_times(ciw.dists.Distribution):
         self.nodo = defaultdict(int)
 
     def sample(self, t=None, ind=None):
-        index = int(str(ind)[11:]) - 1 # Esto es porque la simulacion parte con ind=1
+        # Esto es porque la simulacion parte con ind=1
+        index = int(str(ind)[11:]) - 1
         tiempo = pacientes[index].tiempo_atencion[self.nodo[index]]
         self.nodo[index] += 1
         return tiempo
@@ -183,15 +184,10 @@ class Simulacion:
         self.ultimasim = None
         self.tiempo_total = self.transitorio + \
             self.tiempo_simulando + self.enfriamiento
-        self.N = self.definir_estructura()
+        self.N = self.definir_estructura(self.nueva_configuracion)
         self.paciente = 0
 
-    def arrive_time(self):
-        index = self._arrive_time
-        self._arrive_time += 1
-        return pacientes[index].hora_llegada
-
-    def definir_estructura(self):
+    def definir_estructura(self, nueva_config):
         N = ciw .create_network(
             arrival_distributions=[
                 Arrival_time(),  # Adm
@@ -206,7 +202,7 @@ class Simulacion:
                 ciw.dists.NoArrivals(),  # opr_urg_lim
                 ciw.dists.NoArrivals(),  # opr_ urg_gen
                 ciw.dists.NoArrivals(),  # opr_urg_gen2
-                ciw.dists.NoArrivals()  # Otros
+                ciw.dists.NoArrivals()   # Otros
             ],
             service_distributions=[
                 Service_times(),  # Adm
@@ -217,12 +213,11 @@ class Simulacion:
                 Service_times(),  # salas hosp4
                 Service_times(),  # salas hosp5
                 Service_times(),  # salas hosp6
-                # ] opr101_011 ; EXCL
-                Service_times(),
+                Service_times(),  # opr101_011 ; EXCL
                 Service_times(),  # opr102_001 ; EXCL
                 Service_times(),  # opr101_033 ; Gral
                 Service_times(),  # opr102_003 ; Gral
-                Service_times()  # OTROS ;
+                Service_times()   # OTROS ;
             ],
 
             routing=[define_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
@@ -230,7 +225,7 @@ class Simulacion:
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing],
             number_of_servers=[int(x + y)
-                               for (x, y) in zip(self.base, self.nueva_configuracion)]
+                               for (x, y) in zip(self.base, nueva_config)]
 
         )
         return N
@@ -391,7 +386,7 @@ sim = Simulacion()
 # sim.transciente()
 sim.simular()
 recs = sim.ultimasim.get_all_records()
-arrival = [[r.arrival_date,r.id_number] for r in recs if r.node == 1]
+arrival = [[r.arrival_date, r.id_number] for r in recs if r.node == 1]
 arrival_1 = [[r.service_time, r.id_number] for r in recs if r.node == 1]
 print(arrival)
 print(arrival_1)
