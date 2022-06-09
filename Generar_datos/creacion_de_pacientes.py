@@ -53,8 +53,8 @@ Agregando los supuestos de que todos pasan de admision al box y que de otro a sa
 """
 Matriz_procesada[0] = [0.0, 1, 0.0, 0.0, 0.0, 0.0,
                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-#                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 """
 Fin de agregación de supuestos
 """

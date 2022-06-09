@@ -69,12 +69,23 @@ def define_route(ind):
     return pacientes[index].ruta_num[:-1]
 
 
-class Arrival_times(ciw.dists.Distribution):
+class Service_times(ciw.dists.Distribution):
 
     def sample(self, t=None, ind=None):
         index = int(str(ind)[11:])
         tiempo = pacientes[index].tiempo_atencion[0]
         pacientes[index].tiempo_atencion = pacientes[index].tiempo_atencion[1:]
+        return tiempo
+
+
+class Arrival_time(ciw.dists.Distribution):
+    def __init__(self):
+        self.ind = 0
+
+    def sample(self, t=None, ind=None):
+        index = self.ind
+        self.ind += 1
+        tiempo = pacientes[index].hora_llegada
         return tiempo
 
 
@@ -173,6 +184,7 @@ class Simulacion:
         self.tiempo_total = self.transitorio + \
             self.tiempo_simulando + self.enfriamiento
         self.N = self.definir_estructura()
+        self.paciente = 0
 
     def arrive_time(self):
         index = self._arrive_time
@@ -182,7 +194,7 @@ class Simulacion:
     def definir_estructura(self):
         N = ciw .create_network(
             arrival_distributions=[
-                ciw.dists.Sequential(sequence=tiempos_de_llegada),  # Adm
+                Arrival_time(),  # Adm
                 ciw.dists.NoArrivals(),  # BOXES
                 ciw.dists.NoArrivals(),  # salas hosp 1
                 ciw.dists.NoArrivals(),  # salas hosp 2
@@ -197,20 +209,20 @@ class Simulacion:
                 ciw.dists.NoArrivals()  # Otros
             ],
             service_distributions=[
-                Arrival_times(),  # Adm
-                Arrival_times(),  # Boxes
-                Arrival_times(),  # salas hosp1
-                Arrival_times(),  # salas hosp2
-                Arrival_times(),  # salas hosp3
-                Arrival_times(),  # salas hosp4
-                Arrival_times(),  # salas hosp5
-                Arrival_times(),  # salas hosp6
+                Service_times(),  # Adm
+                Service_times(),  # Boxes
+                Service_times(),  # salas hosp1
+                Service_times(),  # salas hosp2
+                Service_times(),  # salas hosp3
+                Service_times(),  # salas hosp4
+                Service_times(),  # salas hosp5
+                Service_times(),  # salas hosp6
                 # ] opr101_011 ; EXCL
-                Arrival_times(),
-                Arrival_times(),  # opr102_001 ; EXCL
-                Arrival_times(),  # opr101_033 ; Gral
-                Arrival_times(),  # opr102_003 ; Gral
-                Arrival_times()  # OTROS ;
+                Service_times(),
+                Service_times(),  # opr102_001 ; EXCL
+                Service_times(),  # opr101_033 ; Gral
+                Service_times(),  # opr102_003 ; Gral
+                Service_times()  # OTROS ;
             ],
 
             routing=[define_route, ciw.no_routing, ciw.no_routing, ciw.no_routing,
@@ -279,13 +291,14 @@ class Simulacion:
                                tracker=trackers.NodePopulation())
             # Aca se calibra el programa
 
-            Q.simulate_until_max_time(self.tiempo_total)
+            Q.simulate_until_max_time(20)
+            Q.simulate_until_max_time(40)
             recs = Q.get_all_records()
             # guardo los tiempos de espera del sistema y los guardo por nodo
             comienza_enfriamiento = self.tiempo_total-self.enfriamiento
             waits = []
             for r in recs:
-                if r.node != 14 and (r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento):
+                if r.node != 14 or r.node != 13 and (r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento):
                     datos_tiempo.append(r.waiting_time)
                     self.espera_por_nodo[str(
                         r.node)].append(r.waiting_time)
@@ -377,5 +390,7 @@ class Simulacion:
 sim = Simulacion()
 # sim.transciente()
 sim.simular()
+recs = sim.ultimasim.get_all_records()
+arrival = [r.arrival_date for r in recs if r.node == 1]
 # sim.tem_por_nodo()
 breakpoint()
