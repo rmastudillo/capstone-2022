@@ -58,18 +58,21 @@ Defino función para elegir la ruta de los pacientes
 """
 
 
-
+nodo_tiempo = defaultdict(int)
 
 
 class Service_times(ciw.dists.Distribution):
-    def __init__(self):
-        self.nodo = defaultdict(int)
 
     def sample(self, t=None, ind=None):
-        # Esto es porque la simulacion parte con ind=1
+        # Esto es porque la simulacion partqe con ind=1
         index = int(str(ind)[11:]) - 1
-        tiempo = pacientes[index].tiempo_atencion[self.nodo[index]]
-        self.nodo[index] += 1
+        global pacientes
+        global nodo_tiempo
+
+        tiempo = pacientes[index].tiempo_atencion[nodo_tiempo[index]]
+        if (index == 0):
+            print(pacientes[index].tiempo_atencion,nodo_tiempo[index],t,tiempo)
+        nodo_tiempo[index]+= 1
         return tiempo
 
 
@@ -334,6 +337,8 @@ class Simulacion:
             """
             
             recs = self.Q.get_all_records()
+            inds = self.Q.nodes[-1].all_individuals 
+            print([[tuple(dr.service_time for dr in ind.data_records) for ind in inds if ind.id_number==1]])
             breakpoint()
             waits = []
 
