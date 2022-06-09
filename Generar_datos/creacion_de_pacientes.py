@@ -11,14 +11,14 @@ Cada vez que se corra este codigo se van a crear dos archivos con los pacientes 
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
 N_pacientes = 100
-N_bdd = 20
+N_bdd = 1
 
 """
 Crear carpetas
 """
 
-dir_path = os.path.dirname(os.path.realpath(__file__))+"\Pacientes_sim"
-dir_path_old = os.path.dirname(os.path.realpath(__file__))+"\Pacientes_old"
+dir_path = os.path.dirname(os.path.realpath(__file__))+"/Pacientes_sim"
+dir_path_old = os.path.dirname(os.path.realpath(__file__))+"/Pacientes_old"
 os.makedirs(dir_path, exist_ok=True)
 os.makedirs(dir_path_old, exist_ok=True)
 
@@ -125,7 +125,7 @@ def crear_pacientes(N_pacientes, posibilidades):
 def crear_bdd(N_pacientes, N_bdd):
     for _i in range(0, N_bdd):
         pacientes = crear_pacientes(N_pacientes, posibilidades)
-        with open(uniquify(dir_path_old+'\pacientes_generados_0.csv'), 'w', encoding='UTF8', newline="") as f:
+        with open(uniquify(dir_path_old+'/pacientes_generados_0.csv'), 'w', encoding='UTF8', newline="") as f:
             writer = csv.DictWriter(
                 f, fieldnames=['Case ID', 'Area', 'Num_area'])
             writer.writeheader()
@@ -139,7 +139,7 @@ def crear_bdd(N_pacientes, N_bdd):
                     _i += 1
                     writer.writerow(contenido)
                 _index += 1
-        with open(uniquify(dir_path+'\pacientes_generados_ruta_0.csv'), 'w', encoding='UTF8', newline="") as f:
+        with open(uniquify(dir_path+'/pacientes_generados_ruta_0.csv'), 'w', encoding='UTF8', newline="") as f:
             writer = csv.DictWriter(
                 f, fieldnames=['Case ID', 'Area', 'Num_area', 'Tiempo_atencion', 'Tiempo_llegada'])
             writer.writeheader()
