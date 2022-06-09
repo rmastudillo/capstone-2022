@@ -1,7 +1,6 @@
 from bdb import Breakpoint
 from collections import defaultdict
 from email.policy import default
-from msilib import sequence
 from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
@@ -24,7 +23,6 @@ Cargando los pacientes
 """
 pacientes = []
 
-tiempos_de_llegada = []
 
 
 class Paciente:
@@ -39,7 +37,7 @@ class Paciente:
         string = "Paciente num={}, ruta={}".format(self.id, self.ruta_id)
         return(string)
 
-
+"""
 rutas_sin_procesar = pd.read_csv(
     my_path+'/pacientes_generados_ruta.csv', encoding='UTF-8', sep=',').fillna(0).reset_index()
 
@@ -49,9 +47,8 @@ for index, row in rutas_sin_procesar.iterrows():
     p = Paciente(index, row['Area'], num, n_time)
     if not p.hora_llegada:
         p.hora_llegada = row['Tiempo_llegada']
-        tiempos_de_llegada.append(row['Tiempo_llegada'])
     pacientes.append(p)
-
+"""
 
 """
 Pacientes cargados
@@ -61,10 +58,7 @@ Defino función para elegir la ruta de los pacientes
 """
 
 
-def define_route(ind):
-    index = int(str(ind)[11:]) - 1
-    print(pacientes[index].ruta_num[:-1])
-    return pacientes[index].ruta_num[:-1]
+
 
 
 class Service_times(ciw.dists.Distribution):
@@ -86,19 +80,28 @@ class Arrival_time(ciw.dists.Distribution):
     def sample(self, t=None, ind=None):
         index = self.ind
         self.ind += 1
-        tiempo = pacientes[index].hora_llegada
+        try:
+            tiempo = pacientes[index].hora_llegada
+        except:
+            print("mesalieen ",index)
         return round(tiempo, 4)
 
 
 """
+Esta funcion es global porque la simulacion molesta mucho
 """
-
-
+def define_route(ind):
+    index = int(str(ind)[11:]) - 1
+    return pacientes[index].ruta_num[:-1]
+pacientes = []
+"""
+Comienza la simulacion
+"""
 class Simulacion:
     """
     set up:
 
-    nueva_configuracion = es el pi de variables de decisión
+    configuracion = es el pi de variables de decisión
     formato: lista
 
     transi = es el periodo transiente en horas, por defecto son 30 días = 30*24 horas
@@ -169,11 +172,41 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30*12, horario=0, tiempo_simulando=24*30*24, enfriamiento=24*30*8):
-        self.nueva_configuracion = nueva_configuracion
+    def __init__(self, transi=24*30*12, horario=0, tiempo_simulando=24*30*24, enfriamiento=24*30*8):
+        """
+        Cargar los pacientes
+        """
+        self.todos_los_pacientes = [] # aca se van a ir guardando los pacientes
+        self.pacientes = None # son los pacientes actuales
+
+        
+        self.base_actual = 0
+        self.bdd_pacientes_actual = 0 # esto es para recorrer todos los pacientes
+        
+        """
+        Aqui se registra la simulacion actual
+        Q contendra todos los registros
+        configuracion es la nueva configuracion
+        Estos set ups tienen que estar antes de comenzar a simular
+        """
+        self.N = None
+        self.Q = None
+        self.configuracion = None
+        """
+        Tiempo de simulacion
+        transitorio es el periodo transitorio
+        tiempo_simulando es el tiempo que durará la recolección de datos
+        ultimopedazo es la cola de los datos, no se considerarán
+        """
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando
-        self.enfriamiento = enfriamiento
+        self.ultimopedazo = tiempo_simulando + transi
+        self.tiempo_total = transi + tiempo_simulando + enfriamiento
+
+
+
+
+        
         self.horario = horario
         self.tiempos_espera_simulacion = []
         # Datos estadisticos
@@ -181,13 +214,33 @@ class Simulacion:
         self.media_simulacion = int
         # Lista con la desviacion del sistema
         self.desviacion_standard = int
-        self.ultimasim = None
-        self.tiempo_total = self.transitorio + \
-            self.tiempo_simulando + self.enfriamiento
-        self.N = self.definir_estructura(self.nueva_configuracion)
         self.paciente = 0
 
-    def definir_estructura(self, nueva_config):
+    def cargar_pacientes(self,n_bdd):
+        p_path = my_path + '/Generar_datos/Pacientes_sim'
+        try:
+            self.pacientes=self.todos_los_pacientes[n_bdd-1]
+            return self.pacientes
+        except:
+            rutas_sin_procesar = pd.read_csv(p_path+
+                '/pacientes_generados_ruta_{}.csv'.format(n_bdd),
+                encoding='UTF-8', sep=',').fillna(0).reset_index()
+            pacientes = []
+            for index, row in rutas_sin_procesar.iterrows():
+                num = ast.literal_eval(row['Num_area'])
+                n_time = ast.literal_eval(row['Tiempo_atencion'])
+                p = Paciente(index, row['Area'], num, n_time)
+                if not p.hora_llegada:
+                    p.hora_llegada = row['Tiempo_llegada']
+                pacientes.append(p)
+            self.pacientes=pacientes
+            self.todos_los_pacientes.append(pacientes)
+            return self.pacientes
+
+
+
+
+    def definir_estructura(self, nueva_config,pacientes):
         N = ciw .create_network(
             arrival_distributions=[
                 Arrival_time(),  # Adm
@@ -230,46 +283,23 @@ class Simulacion:
         )
         return N
 
-    def transciente(self):
-        """
-        Grafica el tiempo transciente 
-        """
-        Y_i_j = []
-        total_replica = 34
-        dias_sim = 700  # dias
-        t = 24
-        tiempo_simulando = t
-        for _replica in range(0, total_replica):
-            ciw.seed(_replica)
-            Q = ciw.Simulation(self.N,
-                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode],
-                               tracker=trackers.NodePopulation())
-            Y_i = []
-            for _i in range(1, dias_sim):
-                Q.simulate_until_max_time(tiempo_simulando)  # simula i dias
-                waits = []
-                recs = Q.get_all_records()
-                for r in recs:
-                    if r.node != 14:
-                        waits.append(r.waiting_time)
-                    else:
-                        print("ACAA")
-                # mi f(y) es el tiempo medio
-                Y_i.append(round(np.mean(waits), 3))
-                tiempo_simulando += t  # simulo otro día
-            tiempo_simulando = t
-            Y_i_j.append(Y_i)
-        Y_i_j = np.array(Y_i_j)
-        Y_bar_i = Y_i_j.mean(0)
-        self.Y_bar_i = np.around(Y_bar_i, decimals=3)
-        plt.plot(media_movil_ayudantia(self.Y_bar_i, 3))
-        plt.ylabel('some numbers')
-        plt.show()
 
-    def simular(self, rep=1):
+
+    def crear_simulacion(self,N):
+        self.Q = ciw.Simulation(N,
+                            node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                        ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                        ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                        ciw.PSNode],
+                            tracker=trackers.NodePopulation())
+
+
+    def simular(self, rep=1,nueva_configuracion=np.zeros(13)):
+        """
+        Defino la estructura a simular
+        """
+        
+
         """
         rep es el numero de veces que se hace la simulación
         se recolectan los datos de cada simulación con la configuración dada
@@ -277,23 +307,43 @@ class Simulacion:
         datos_tiempo = []
         datos_trial = []
         for trial in range(rep):
-            ciw.seed(trial)
-            Q = ciw.Simulation(self.N,
-                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode],
-                               tracker=trackers.NodePopulation())
-            # Aca se calibra el programa
+            
+            """
+            Acá cargo los pacientes para no usar tanta ram
+            """
+            global pacientes
+            pacientes = self.cargar_pacientes(trial)
+            self.N = self.definir_estructura(nueva_configuracion,pacientes)
+            """
+            Pacientes cargados
+            """
+            """
+            Aqui se crea la simulación
+            Parametro N que es la estructura
+            """
+            self.crear_simulacion(self.N)
 
-            Q.simulate_until_max_time(20)
-            Q.simulate_until_max_time(40)
-            recs = Q.get_all_records()
-            # guardo los tiempos de espera del sistema y los guardo por nodo
-            comienza_enfriamiento = self.tiempo_total-self.enfriamiento
+            """
+            Se simula hasta tiempo_total
+            """
+            self.Q.simulate_until_max_time(self.tiempo_total)
+            self.base_actual+=1 # ya simule en el archivo trial
+            """
+            # Comienza el registro de datos, la simulacion actual
+            está en self.Q
+            """
+            
+            recs = self.Q.get_all_records()
+            breakpoint()
             waits = []
+
+
             for r in recs:
-                if r.node != 14 or r.node != 13 and (r.arrival_date > self.transitorio and r.arrival_date < comienza_enfriamiento):
+                """
+                Filtros
+                """
+
+                if r.node != 14 or r.node != 13 and (r.arrival_date > self.transitorio and r.arrival_date < self.ultimopedazo):
                     datos_tiempo.append(r.waiting_time)
                     self.espera_por_nodo[str(
                         r.node)].append(r.waiting_time)
@@ -349,10 +399,9 @@ class Simulacion:
         """
         Guardo la ultima trial para revisar a mano
         """
-        self.ultimasim = Q
 
     def cambiar_configuracion(self, nueva_config):
-        self.nueva_configuracion = nueva_config
+        self.configuracion = nueva_config
         self.definir_estructura()
         self.reiniciar_registros()
 
@@ -380,12 +429,50 @@ class Simulacion:
 
         self.desviacion_standard = 0
         self.medias_simulacion = 0
+    def transciente(self):
+        """
+        Grafica el tiempo transciente 
+        """
+        Y_i_j = []
+        total_replica = 34
+        dias_sim = 700  # dias
+        t = 24
+        tiempo_simulando = t
+        for _replica in range(0, total_replica):
+            ciw.seed(_replica)
+            Q = ciw.Simulation(self.N,
+                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
+                                           ciw.PSNode],
+                               tracker=trackers.NodePopulation())
+            Y_i = []
+            for _i in range(1, dias_sim):
+                Q.simulate_until_max_time(tiempo_simulando)  # simula i dias
+                waits = []
+                recs = Q.get_all_records()
+                for r in recs:
+                    if r.node != 14:
+                        waits.append(r.waiting_time)
+                    else:
+                        print("ACAA")
+                # mi f(y) es el tiempo medio
+                Y_i.append(round(np.mean(waits), 3))
+                tiempo_simulando += t  # simulo otro día
+            tiempo_simulando = t
+            Y_i_j.append(Y_i)
+        Y_i_j = np.array(Y_i_j)
+        Y_bar_i = Y_i_j.mean(0)
+        self.Y_bar_i = np.around(Y_bar_i, decimals=3)
+        plt.plot(media_movil_ayudantia(self.Y_bar_i, 3))
+        plt.ylabel('some numbers')
+        plt.show()
 
 
 sim = Simulacion()
 # sim.transciente()
 sim.simular()
-recs = sim.ultimasim.get_all_records()
+recs = sim.Q.get_all_records()
 arrival = [[r.arrival_date, r.id_number] for r in recs if r.node == 1]
 arrival_1 = [[r.service_time, r.id_number] for r in recs if r.node == 1]
 print(arrival)
