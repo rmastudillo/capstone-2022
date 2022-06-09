@@ -100,47 +100,48 @@ def func_pers_tpos_hosp(u_actual= ""):
 
     if u_actual == "OPR102_001": 
         a = dist_promedio()
-        a = round(a, 3)
-        return float(a)
+        return a
 
     elif u_actual == 'OPR101_033':
         a = dist_desde_opr_033()
-        a = round(a, 3)
-        return float(a)
+        
+        return a
     
     elif u_actual == "OPR102_003":
         a = dist_desde_opr102_003()
-        a = round(a, 3)
-        return float(a)
+        
+        return a
 
     elif u_actual == "OPR101_011":
         """
         Dado que solo cuenta con 2 datos, asumimos que tendra distribucion promedio
         """
         a = dist_promedio()
-        a = round(a, 3)
-        return float(a)
+        
+        return a
 
     elif u_actual == 'DIV101_703':
         a = dist_desde_div101_703()
-        a = round(a, 3)
-        return float(a)
+        
+        return a
 
     elif u_actual == 'DIV103_204':
         """
         Dado que tiene solo 7 datos, modelamos asi:
         """
         a = dist_desde_div103_204()
-        a = round(a, 3)
-        return float(a)
+
+        return a
 
     else:
-        a = dist_desde_otros_prom() #Debiese actuvarse muy pocas veces y variara poco
-        a = round(a)
-        return float(a) #Debiese actuvarse muy pocas veces y variara poco
-
+        a = dist_desde_otros_prom() 
+        return a 
 
 def t_llegada_entre_pacientes(tpo_actual_aux):
+
+    tpo_actual_aux = 0
+    
+    return np.random.exponential(0.3845)
     """
     Esto retorna cuanto tiempo se demora el siguiente paciente en llega
     no necesita saber el tiempo actual
@@ -151,24 +152,26 @@ def t_llegada_entre_pacientes(tpo_actual_aux):
     se llama t_llegada_entre_pacientes para determinar la llegada del paciente 3
     retorna 1.5 -> entonces llega en t=3 (lo calcula la simulacion)
     """
-
+    
     """Ahora, recibe tpo_actual_aux, el cual en base al tiempo actual de llegada """
-    if tpo_actual_aux % 24 < 7.0:  # Hora valle
-        # parametro para horario entre 00 y 6:59, calculado con ventana de 16 horas
-        return round(np.random.exponential(7.31), 3)
+    # if tpo_actual_aux % 24 < 7.0:  # Hora valle
+    #     # parametro para horario entre 00 y 6:59, calculado con ventana de 16 horas
+    #     return np.random.exponential(7.31)
 
-    else:
-        # parametro para horario entre 7 y 23:59
-        return round(np.random.exponential(3.935), 3)
+    # else:
+    #     # parametro para horario entre 7 y 23:59
+    #     return np.random.exponential(3.935)
+
+
 
 
 def t_urg101003():
     # --> scale = 1/rate.
-    return round(np.random.gamma(shape=27.33998, scale=0.003347065), 3)
+    return np.random.gamma(shape=27.33998, scale=0.003347065)
 
 
 def t_div101703():
-    return round(np.random.gamma(shape=2.289, scale=0.2999213))
+    return np.random.gamma(shape=2.289, scale=0.2999213)
 
 
 """ 
@@ -206,19 +209,19 @@ def t_div103204(u_actual=''):
 
 
 def t_opr102001():
-    return round(random.weibullvariate(2.618, 4.572), 3)
+    return random.weibullvariate(2.618, 4.572)
 
 
 def t_opr101011():
-    return round(random.weibullvariate(alpha=2.546, beta=4.644), 3)
+    return random.weibullvariate(alpha=2.546, beta=4.644)
 
 
 def t_opr102003():
-    return round(random.weibullvariate(2.678, 5.733), 3)
+    return random.weibullvariate(2.678, 5.733)
 
 
 def t_opr101033():
-    return round(random.weibullvariate(2.67, 5.37), 3)
+    return random.weibullvariate(2.67, 5.37)
 
 
 def t_otro():
