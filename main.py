@@ -68,10 +68,8 @@ class Service_times(ciw.dists.Distribution):
         index = int(str(ind)[11:]) - 1
         global pacientes
         global nodo_tiempo
-
+        print(index,"AAA")
         tiempo = pacientes[index].tiempo_atencion[nodo_tiempo[index]]
-        if (index == 0):
-            print(pacientes[index].tiempo_atencion,nodo_tiempo[index],t,tiempo)
         nodo_tiempo[index]+= 1
         return tiempo
 
@@ -131,7 +129,7 @@ class Simulacion:
         historial_sistema es una lista con diccionarios que guarda
         media y distribucion calculada de todo el sistema
     """
-    historial_sistema = []
+    historial_replicas = []
     """
         - Todos los nodos juntos cada simulacion:
         historial_simulacion es una lista con diccionarios que guarda
@@ -153,7 +151,7 @@ class Simulacion:
         num_trial(int)
         nodo(str(int))
     """
-    historial_sistema_nodos = []
+    historial_replicas_nodos = []
     """
         - Todos los nodos separados cada simulacion:
         historial_simulacion es una lista con diccionarios que guarda
@@ -175,7 +173,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, transi=24*30*12, horario=0, tiempo_simulando=24*30*24, enfriamiento=24*30*8):
+    def __init__(self, transi=0, horario=0, tiempo_simulando=24*30*24, enfriamiento=0):
         """
         Cargar los pacientes
         """
@@ -195,6 +193,7 @@ class Simulacion:
         self.N = None
         self.Q = None
         self.configuracion = None
+        self.simulacion_actual = -1
         """
         Tiempo de simulacion
         transitorio es el periodo transitorio
@@ -206,7 +205,11 @@ class Simulacion:
         self.ultimopedazo = tiempo_simulando + transi
         self.tiempo_total = transi + tiempo_simulando + enfriamiento
 
-
+        """
+        Listas para guardar datos
+        """
+        self.datos_tiempo = []
+        self.datos_trial = []
 
 
         
@@ -222,7 +225,7 @@ class Simulacion:
     def cargar_pacientes(self,n_bdd):
         p_path = my_path + '/Generar_datos/Pacientes_sim'
         try:
-            self.pacientes=self.todos_los_pacientes[n_bdd-1]
+            self.pacientes=self.todos_los_pacientes[n_bdd]
             return self.pacientes
         except:
             rutas_sin_procesar = pd.read_csv(p_path+
@@ -238,6 +241,7 @@ class Simulacion:
                 pacientes.append(p)
             self.pacientes=pacientes
             self.todos_los_pacientes.append(pacientes)
+            print(self.pacientes[:3])
             return self.pacientes
 
 
@@ -294,10 +298,10 @@ class Simulacion:
                                         ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
                                         ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
                                         ciw.PSNode],
-                            tracker=trackers.NodePopulation())
+                            tracker=trackers.NodePopulation(),exact=5)
 
 
-    def simular(self, rep=1,nueva_configuracion=np.zeros(13)):
+    def simular(self,nueva_configuracion=np.zeros(13),ini=0, rep=2):
         """
         Defino la estructura a simular
         """
@@ -307,9 +311,12 @@ class Simulacion:
         rep es el numero de veces que se hace la simulación
         se recolectan los datos de cada simulación con la configuración dada
         """
-        datos_tiempo = []
-        datos_trial = []
-        for trial in range(rep):
+        if not ini:
+            self.datos_tiempo = []
+            self.datos_trial = []
+            self.simulacion_actual+=1
+        for trial in range(ini,rep+ini):
+            print("COMENCE LA ITERACION {}".format(trial))
             
             """
             Acá cargo los pacientes para no usar tanta ram
@@ -331,25 +338,22 @@ class Simulacion:
             """
             self.Q.simulate_until_max_time(self.tiempo_total)
             self.base_actual+=1 # ya simule en el archivo trial
+            global nodo_tiempo
+            nodo_tiempo = defaultdict(int)
             """
             # Comienza el registro de datos, la simulacion actual
             está en self.Q
             """
             
             recs = self.Q.get_all_records()
-            inds = self.Q.nodes[-1].all_individuals 
-            print([[tuple(dr.service_time for dr in ind.data_records) for ind in inds if ind.id_number==1]])
-            breakpoint()
             waits = []
-
-
             for r in recs:
                 """
                 Filtros
                 """
 
-                if r.node != 14 or r.node != 13 and (r.arrival_date > self.transitorio and r.arrival_date < self.ultimopedazo):
-                    datos_tiempo.append(r.waiting_time)
+                if not (r.node == 14 or r.node == 13) and (r.arrival_date > self.transitorio and r.arrival_date < self.ultimopedazo):
+                    self.datos_tiempo.append(r.waiting_time)
                     self.espera_por_nodo[str(
                         r.node)].append(r.waiting_time)
                     self.espera_sim_por_nodo[str(trial)][str(
@@ -358,32 +362,27 @@ class Simulacion:
 
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
-            datos_trial.append(stadisticas)
-
-            """
-            Reinicio la info de los pacientes
-            """
-            for index, row in rutas_sin_procesar.iterrows():
-                n_time = ast.literal_eval(row['Tiempo_atencion'])
-                if index < len(pacientes):
-                    pacientes[index].tiempo_atencion = n_time
+            self.datos_trial.append(stadisticas)
+            print("TERMINE LA ITERACION")
 
         """
         1) a)
         """
-        self.historial_sistema.append(datos_trial)
+        if ini == 0:
+            self.historial_replicas.append(self.datos_trial)
         """
         1) b)
         """
         estadisticas_total = {"media": np.mean(
-            datos_tiempo), "sd": np.std(datos_tiempo)}
-
-        self.historial_simulacion.append(estadisticas_total)
-
+            self.datos_tiempo), "sd": np.std(self.datos_tiempo)}
+        if ini==0:
+            self.historial_simulacion.append(estadisticas_total)
+        else:
+            self.historial_simulacion[self.simulacion_actual] = estadisticas_total
         """
         2) a)
         """
-        self.historial_simulacion_nodos.append(
+        self.historial_replicas_nodos.append(
             self.tem_por_nodo(self.espera_por_nodo))
 
         """
@@ -393,14 +392,14 @@ class Simulacion:
         for i in range(0, rep):
             lista_datos_trial.append(self.tem_por_nodo(
                 self.espera_sim_por_nodo[str(i)]))
-        self.historial_sistema_nodos.append(lista_datos_trial)
+        self.historial_simulacion_nodos.append(lista_datos_trial)
 
         """
         Registro media y desviacion para accede mas rapido
         """
         self.media_simulacion = np.mean(
-            datos_tiempo)
-        self.desviacion_standard = np.std(datos_tiempo)
+            self.datos_tiempo)
+        self.desviacion_standard = np.std(self.datos_tiempo)
         """
         Guardo la ultima trial para revisar a mano
         """
@@ -413,10 +412,8 @@ class Simulacion:
     def tem_por_nodo(self, espera_nodo=espera_por_nodo):
         datos = defaultdict(dict)
         for nodo in espera_nodo.keys():
-            datos[nodo]['media'] = round(
-                np.mean(espera_nodo[nodo]), 4)
-            datos[nodo]['sd'] = round(
-                np.std(espera_nodo[nodo]), 4)
+            datos[nodo]['media'] = np.mean(espera_nodo[nodo])
+            datos[nodo]['sd'] = np.std(espera_nodo[nodo])
         #print("Datos tiempo de espera por nodo en el total de las simulaciones")
         # for i in range(1, 14):
         #    print("Nodo {} = ".format(i), datos[str(i)])
@@ -476,11 +473,10 @@ class Simulacion:
 
 sim = Simulacion()
 # sim.transciente()
-sim.simular()
+sim.simular(rep=1)
+sim.simular(ini=1,rep=2)
+sim.simular(rep=2)
+# Una nueva simulacion NO DEBE TENER INI
 recs = sim.Q.get_all_records()
-arrival = [[r.arrival_date, r.id_number] for r in recs if r.node == 1]
-arrival_1 = [[r.service_time, r.id_number] for r in recs if r.node == 1]
-print(arrival)
-print(arrival_1)
 # sim.tem_por_nodo()
 breakpoint()
