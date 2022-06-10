@@ -223,6 +223,7 @@ class Simulacion:
         self.paciente = 0
 
     def cargar_pacientes(self,n_bdd):
+        print(n_bdd,"ESTO DEBERIA DAR HASTA 30")
         p_path = my_path + '/Generar_datos/Pacientes_sim'
         try:
             self.pacientes=self.todos_los_pacientes[n_bdd]
@@ -247,7 +248,7 @@ class Simulacion:
 
 
 
-    def definir_estructura(self, nueva_config,pacientes):
+    def definir_estructura(self, nueva_config):
         N = ciw .create_network(
             arrival_distributions=[
                 Arrival_time(),  # Adm
@@ -323,7 +324,7 @@ class Simulacion:
             """
             global pacientes
             pacientes = self.cargar_pacientes(trial)
-            self.N = self.definir_estructura(nueva_configuracion,pacientes)
+            self.N = self.definir_estructura(nueva_configuracion)
             """
             Pacientes cargados
             """
@@ -440,29 +441,41 @@ class Simulacion:
         """
         Y_i_j = []
         total_replica = 34
-        dias_sim = 700  # dias
+        dias_sim = 7  # dias
         t = 24
         tiempo_simulando = t
-        for _replica in range(0, total_replica):
-            ciw.seed(_replica)
-            Q = ciw.Simulation(self.N,
-                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode],
-                               tracker=trackers.NodePopulation())
+        for trial in range(total_replica):
+            print("COMENCE LA ITERACION {}".format(trial))
+            
+            """
+            Acá cargo los pacientes para no usar tanta ram
+            """
+            global pacientes
+            pacientes = self.cargar_pacientes(trial)
+            self.N = self.definir_estructura(nueva_config=np.zeros(13))
+            """
+            Pacientes cargados
+            """
+            """
+            Aqui se crea la simulación
+            Parametro N que es la estructura
+            """
+            self.crear_simulacion(self.N)
+
+            """
+            Se simula hasta tiempo_total
+            """
             Y_i = []
             for _i in range(1, dias_sim):
-                Q.simulate_until_max_time(tiempo_simulando)  # simula i dias
+                self.Q.simulate_until_max_time(tiempo_simulando)  # simula i dias
                 waits = []
-                recs = Q.get_all_records()
+                recs = self.Q.get_all_records()
                 for r in recs:
-                    if r.node != 14:
+                    if (r.node != 14 and r.node != 13):
                         waits.append(r.waiting_time)
-                    else:
-                        print("ACAA")
+
                 # mi f(y) es el tiempo medio
-                Y_i.append(round(np.mean(waits), 3))
+                Y_i.append(np.mean(waits))
                 tiempo_simulando += t  # simulo otro día
             tiempo_simulando = t
             Y_i_j.append(Y_i)
@@ -477,7 +490,8 @@ class Simulacion:
 sim = Simulacion()
 # sim.transciente()
 
-
+sim.transciente()
+breakpoint()
 sim.simular(rep=2)
 # Una nueva simulacion NO DEBE TENER INI
 recs = sim.Q.get_all_records()

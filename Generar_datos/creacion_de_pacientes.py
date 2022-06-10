@@ -11,7 +11,7 @@ Cada vez que se corra este codigo se van a crear dos archivos con los pacientes 
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
 N_pacientes = 100000
-N_bdd = 2
+N_bdd = 30
 
 """
 Crear carpetas
