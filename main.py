@@ -180,7 +180,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, transi=24*30*6, horario=0, tiempo_simulando=24*30*24, enfriamiento=0):
+    def __init__(self, transi=24*30*2, horario=0, tiempo_simulando=24*30*10, enfriamiento=0):
         """
         Cargar los pacientes
         """
@@ -494,14 +494,14 @@ class Simulacion:
         breakpoint()
 
 
-sim = Simulacion()
+#sim = Simulacion()
 # sim.transciente()
 
-sim.transciente()
-breakpoint()
-sim.simular(rep=2)
+# sim.transciente()
+# breakpoint()
+# sim.simular(rep=2)
 # Una nueva simulacion NO DEBE TENER INI
-recs = sim.Q.get_all_records()
+#recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()
-print(sim.mean, sim.sd)
-breakpoint()
+#print(sim.mean, sim.sd)
+# breakpoint()

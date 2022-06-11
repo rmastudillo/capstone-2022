@@ -4,9 +4,12 @@ import random as random
 import itertools as iter
 import csv
 import os
+from main import *
 
 my_path = os.path.abspath(os.path.dirname(__file__))
 factibless = []
+"""
+
 with open(my_path+"/data_fact.csv", "r") as read_obj:
     csv_reader = csv.reader(read_obj)
     list_csv_1 = tuple(csv_reader)
@@ -23,6 +26,7 @@ with open(my_path+"/data_fact_4.csv", "r") as read_obj4:
     csv_reader4 = csv.reader(read_obj4)
     list_csv_4 = tuple(csv_reader4)
     factibless += list_csv_4
+"""
 
 
 def factos(conf, fact):
@@ -50,10 +54,11 @@ def factibilidad(configuracion):
                    Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_Cama[0], Pr_24[0]]
     lst_costOP = [Pr_Vent[1], Pr_Vent[1], Pr_Box[1], Pr_Box[1], Pr_Box[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1],
                   Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_Cama[1], Pr_24[1]]
-    a = np.dot(lst[i], lst_costCAP, out=None)
-    b = np.dot(lst[i], lst_costOP, out=None)
-    if a <= Presup_Ca and b <= Presup_Op:
-        return True
+    for i in range(len(lst)):
+        a = np.dot(lst[i], lst_costCAP, out=None)
+        b = np.dot(lst[i], lst_costOP, out=None)
+        if a <= Presup_Ca and b <= Presup_Op:
+            return True
     else:
         return False
 
@@ -68,30 +73,33 @@ def generar_vecino(configuration):
             vecino_sa[casilla] = 1
         else:
             vecino_sa[casilla] = 0
-        print("aca se cae")
         # corroborar si lo haremos así o no
-        fact = factos(vecino_sa, factibless)
-        print("aca se cae")
+        fact = factibilidad(vecino_sa)
     vecino_sim = [vecino_sa[0]+vecino_sa[1], vecino_sa[2] + vecino_sa[3] + vecino_sa[4], vecino_sa[5] + vecino_sa[6] + vecino_sa[7], vecino_sa[8], vecino_sa[9] + vecino_sa[10] +
                   vecino_sa[11], vecino_sa[12] + vecino_sa[13], vecino_sa[14] + vecino_sa[15] + vecino_sa[16] + vecino_sa[17], vecino_sa[18] + vecino_sa[19] + vecino_sa[20], vecino_sa[21]]
     return vecino_sa, vecino_sim
 
 
-def simulacion(configuracion, escenarios):
+def simulacion(configuracion, escenarios, sim=Simulacion, n_sim=0):
+    resultado = []
+    configuracion = configuracion[:-1] + [0, 0, 0, 0, 0]
+    sim.simular(nueva_configuracion=configuracion, rep=escenarios)
+    for i in range(len(sim.historial_replicas[n_sim])):
+        resultado.append(float(sim.historial_replicas[n_sim][i]["media"]))
+    return resultado
 
-    return
 
+def SA(NITER=100, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alpha=0.99, beta=0.5, sim=Simulacion):
 
-def SA(NITER=100, Tk=1000, configuracion_inicial=np.zeros(13), alpha=0.99, beta=0.5):
     accept = 0
 
     configuracion = configuracion_inicial
     # lista de largo cantidad de réplicas
-    valor_actual = simulacion(configuracion_inicial, 30)
+    valor_actual = simulacion(configuracion_inicial, 3, sim)
 
     configuracion_ideal = [2, 3, 3, 1, 3, 2, 4, 3, 1]
-    valor_ideal = simulacion(configuracion_ideal, 30)
-
+    valor_ideal = simulacion(configuracion_ideal, 3, sim=1)
+    
     best_configuracion = np.copy(configuracion)
     best_valor = valor_actual
     iteracion = 0
@@ -102,7 +110,7 @@ def SA(NITER=100, Tk=1000, configuracion_inicial=np.zeros(13), alpha=0.99, beta=
         vecino = generar_vecino(configuracion)
         vecino_sa = vecino[0]
         vecino_sim = vecino[1]
-        valor_vecino = simulacion(vecino_sim, 30)
+        valor_vecino = simulacion(vecino_sim, 30, sim)
         mu = np.mean(list(map(lambda x, y: x-y, valor_vecino, valor_old)))
         # quizas hay que cambiar ddof a 1
         s = np.std(list(map(lambda x, y: x-y, valor_vecino, valor_old)), ddof=1)
@@ -130,9 +138,9 @@ def SA(NITER=100, Tk=1000, configuracion_inicial=np.zeros(13), alpha=0.99, beta=
         else:
             # fijar cuantas réplicas más y como la simulaciñon elige las extras distintas
             while intervalo[0] < 0 and intervalo[1] > 0:
-                valor_vecino_ext = simulacion(vecino_sim, 10)
+                valor_vecino_ext = simulacion(vecino_sim, 10, sim)
                 # ver cúantas replicas extras y cómo se lo pedimos a la simulacion
-                valor_actual_ext = simulacion(configuracion, 10)
+                valor_actual_ext = simulacion(configuracion, 10, sim)
                 valor_vecino = valor_vecino + valor_vecino_ext
                 valor_actual = valor_actual + valor_actual_ext
                 mu = np.mean(
@@ -172,3 +180,5 @@ h = generar_vecino([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 print(h[0])
 print(h[1])
+sim = Simulacion()
+sa = SA(sim=sim)
