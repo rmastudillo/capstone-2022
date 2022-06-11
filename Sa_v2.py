@@ -124,9 +124,18 @@ def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alp
         valor_old = valor_actual
         # es de esa o de best_configuracion ????
 
+        """
+        Propiedad de tomacho
+        """
+
         vecino = generar_vecino(configuracion)
         vecino_sa = vecino[0]
         vecino_sim = vecino[1]
+
+        """
+        Propiedad de tomacho
+        """
+
         valor_vecino = simulacion(vecino_sim, n_replicas, sim, n_sim=i)
         mu = np.mean(list(map(lambda x, y: x-y, valor_vecino, valor_old)))
         # quizas hay que cambiar ddof a 1
