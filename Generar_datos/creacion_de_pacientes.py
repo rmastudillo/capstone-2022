@@ -10,7 +10,7 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-N_pacientes = 100000
+N_pacientes = 10000
 N_bdd = 30
 
 """
@@ -103,9 +103,11 @@ def crear_pacientes(N_pacientes, posibilidades):
         tpo_actual_aux += tiempo
         # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
         # en otro caso, la otra tasa
- 
-        l_tpo_pers = ['OPR102_001', 'OPR101_011', 'OPR102_003', 'OPR101_033', 'DIV103_204', 'DIV101_703']
-        l_hosp = ['DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107', 'DIV104_602', 'DIV103_204']
+
+        l_tpo_pers = ['OPR102_001', 'OPR101_011', 'OPR102_003',
+                      'OPR101_033', 'DIV103_204', 'DIV101_703']
+        l_hosp = ['DIV101_603', 'DIV101_604', 'DIV102_203',
+                  'DIV103_107', 'DIV104_602', 'DIV103_204']
 
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
@@ -114,7 +116,7 @@ def crear_pacientes(N_pacientes, posibilidades):
         t_atencion_areas[u_actual].append(tiempo_atendido)
         while u_actual != 'End':
             siguiente_destino = seleccionar_siguiente_paso(
-                posibilidades, u_actual) # u_actual = OPR, sgt sala hosp
+                posibilidades, u_actual)  # u_actual = OPR, sgt sala hosp
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
 

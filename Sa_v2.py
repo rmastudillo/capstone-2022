@@ -89,34 +89,52 @@ def simulacion(configuracion, escenarios, sim=Simulacion, n_sim=0):
     return resultado
 
 
-def SA(NITER=100, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alpha=0.99, beta=0.5, sim=Simulacion):
+def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alpha=0.99, beta=0.5, sim=Simulacion):
 
     accept = 0
 
-    configuracion = configuracion_inicial
+    configuracion = [0, 0, 0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    print(len(configuracion))
     # lista de largo cantidad de réplicas
     valor_actual = simulacion(configuracion_inicial, 3, sim)
 
     configuracion_ideal = [2, 3, 3, 1, 3, 2, 4, 3, 1]
-    valor_ideal = simulacion(configuracion_ideal, 3, sim=1)
-    
+    valor_ideal = simulacion(configuracion_ideal, 3, sim, n_sim=1)
     best_configuracion = np.copy(configuracion)
     best_valor = valor_actual
     iteracion = 0
+    """
+    Reinicio la simulacion
+    """
+    sim = Simulacion()
 
+    """
+    Numero de replicas
+    """
+    n_replicas = 2
+    replicas_adicionales = 2
+
+    breakpoint()
+
+    """
+    Comienza SA
+    """
     for i in range(NITER):
         valor_old = valor_actual
         # es de esa o de best_configuracion ????
+
         vecino = generar_vecino(configuracion)
         vecino_sa = vecino[0]
         vecino_sim = vecino[1]
-        valor_vecino = simulacion(vecino_sim, 30, sim)
+        valor_vecino = simulacion(vecino_sim, n_replicas, sim, n_sim=i)
         mu = np.mean(list(map(lambda x, y: x-y, valor_vecino, valor_old)))
         # quizas hay que cambiar ddof a 1
         s = np.std(list(map(lambda x, y: x-y, valor_vecino, valor_old)), ddof=1)
         # cantidad de réplicas, el largo de la lista
         ancho = 1.96*s/np.sqrt(len(valor_vecino))
         intervalo = [mu - ancho, mu + ancho]
+
         if intervalo[1] < 0:
             configuracion = vecino_sa
             valor_actual = valor_vecino
@@ -137,10 +155,14 @@ def SA(NITER=100, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], al
 
         else:
             # fijar cuantas réplicas más y como la simulaciñon elige las extras distintas
+
+            replicas_actual = n_replicas
             while intervalo[0] < 0 and intervalo[1] > 0:
-                valor_vecino_ext = simulacion(vecino_sim, 10, sim)
+
+                valor_vecino_ext = simulacion(vecino_sim, replicas_actual, sim)
                 # ver cúantas replicas extras y cómo se lo pedimos a la simulacion
-                valor_actual_ext = simulacion(configuracion, 10, sim)
+                valor_actual_ext = simulacion(
+                    configuracion, replicas_actual, sim)
                 valor_vecino = valor_vecino + valor_vecino_ext
                 valor_actual = valor_actual + valor_actual_ext
                 mu = np.mean(
@@ -149,27 +171,30 @@ def SA(NITER=100, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], al
                 s = np.std(
                     list(map(lambda x, y: x-y, valor_vecino, valor_actual)), ddof=1)
                 # cantidad de réplicas, el largo de la lista
-                ancho = 1.96*s/np.sqrt(len(valor_vecino))
+                ancho = 1.64*s/np.sqrt(len(valor_vecino))
                 intervalo = [mu - ancho, mu + ancho]
-            if intervalo[1] < 0:
-                configuracion = vecino_sa
-                valor_actual = valor_vecino
-                accept = 1
-                probT = 1
-                if valor_actual < best_valor:
-                    best_configuracion = np.copy(configuracion)
-                    best_valor = valor_actual
-                    iteracion = i+1
-            elif intervalo[0] > 0:
-                probT = np.exp(-mu/(beta*Tk))
-                if probT >= np.random.uniform(0, 1):
-                    configuracion = np.copy(vecino_sa)
+                if intervalo[1] < 0:
+                    configuracion = vecino_sa
                     valor_actual = valor_vecino
                     accept = 1
+                    probT = 1
+                    if valor_actual < best_valor:
+                        best_configuracion = np.copy(configuracion)
+                        best_valor = valor_actual
+                        iteracion = i+1
+                elif intervalo[0] > 0:
+                    probT = np.exp(-mu/(beta*Tk))
+                    if probT >= np.random.uniform(0, 1):
+                        configuracion = np.copy(vecino_sa)
+                        valor_actual = valor_vecino
+                        accept = 1
+                    else:
+                        accept = 0
                 else:
-                    accept = 0
-        if np.mean(best_valor) <= 1.2 * np.mean(valor_ideal):  # tenemos que ver dd va
-            break
+                    replicas_actual += replicas_adicionales
+
+        # if np.mean(best_valor) <= 1.2 * np.mean(valor_ideal):  # tenemos que ver dd va
+        #    break
         Tk = alpha*Tk
     media_best = np.mean(best_valor)
     return best_valor, best_configuracion, media_best
@@ -182,3 +207,4 @@ print(h[0])
 print(h[1])
 sim = Simulacion()
 sa = SA(sim=sim)
+breakpoint()

@@ -17,7 +17,22 @@ import os
 from media_movil import media_movil_ayudantia
 
 
+"""
+ESTO CAMBIA EL PERIODO 
+"""
+
+TRANSIENTE = 24*7*20
+SIMULANDO = 24*7*20
+
+"""
+ESTO CAMBIA EL PERIODO 
+"""
+
+
+
+
 my_path = os.path.abspath(os.path.dirname(__file__))
+
 
 """
 Cargando los pacientes
@@ -124,6 +139,7 @@ class Simulacion:
     """
 
     base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
+    #base = [5, 8, 8, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
 
     """
     Datos:
@@ -180,7 +196,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, transi=24*30*2, horario=0, tiempo_simulando=24*30*10, enfriamiento=0):
+    def __init__(self, transi=TRANSIENTE, horario=0, tiempo_simulando=SIMULANDO, enfriamiento=0):
         """
         Cargar los pacientes
         """
@@ -251,6 +267,9 @@ class Simulacion:
             return self.pacientes
 
     def definir_estructura(self, nueva_config):
+        servers = [int(x + y) for (x, y) in zip(self.base, nueva_config)]
+        print("Se está usando la configuracion: ")
+        print(servers)
         N = ciw .create_network(
             arrival_distributions=[
                 Arrival_time(),  # Adm
@@ -287,8 +306,8 @@ class Simulacion:
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing, ciw.no_routing, ciw.no_routing, ciw.no_routing,
                      ciw.no_routing],
-            number_of_servers=[int(x + y)
-                               for (x, y) in zip(self.base, nueva_config)]
+            # number_of_servers=self.base
+            number_of_servers=servers
 
         )
         return N
@@ -358,7 +377,6 @@ class Simulacion:
                     self.espera_sim_por_nodo[str(trial)][str(
                         r.node)].append(r.waiting_time)
                     waits.append(r.waiting_time)
-
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
             self.datos_trial.append(stadisticas)
@@ -499,7 +517,9 @@ class Simulacion:
 
 # sim.transciente()
 # breakpoint()
-# sim.simular(rep=2)
+# sim.simular(rep=3)
+# print(sim.historial_replicas)
+# breakpoint()
 # Una nueva simulacion NO DEBE TENER INI
 #recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()
