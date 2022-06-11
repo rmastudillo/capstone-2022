@@ -8,6 +8,8 @@ from main import *
 
 my_path = os.path.abspath(os.path.dirname(__file__))
 factibless = []
+
+
 """
 
 with open(my_path+"/data_fact.csv", "r") as read_obj:
