@@ -9,27 +9,28 @@ from main import *
 my_path = os.path.abspath(os.path.dirname(__file__))
 factibless = []
 
-
 """
-
-with open(my_path+"/data_fact.csv", "r") as read_obj:
+with open(my_path+"/Dominio-factible/data_fact.csv", "r") as read_obj:
     csv_reader = csv.reader(read_obj)
-    list_csv_1 = tuple(csv_reader)
-    factibless += list_csv_1
-with open(my_path+"/data_fact_2.csv", "r") as read_obj2:
+    list_csv_1 = list(csv_reader)
+    factibless += list_csv_1[1:]
+with open(my_path+"/Dominio-factible/data_fact_2.csv", "r") as read_obj2:
     csv_reader2 = csv.reader(read_obj2)
-    list_csv_2 = tuple(csv_reader2)
-    factibless += list_csv_2
-with open(my_path+"/data_fact_3.csv", "r") as read_obj3:
+    list_csv_2 = list(csv_reader2)
+    factibless += list_csv_2[1:]
+with open(my_path+"/Dominio-factible/data_fact_3.csv", "r") as read_obj3:
     csv_reader3 = csv.reader(read_obj3)
-    list_csv_3 = tuple(csv_reader3)
-    factibless += list_csv_3
-with open(my_path+"/data_fact_4.csv", "r") as read_obj4:
+    list_csv_3 = list(csv_reader3)
+    factibless += list_csv_3[1:]
+with open(my_path+"/Dominio-factible/data_fact_4.csv", "r") as read_obj4:
     csv_reader4 = csv.reader(read_obj4)
-    list_csv_4 = tuple(csv_reader4)
-    factibless += list_csv_4
-"""
+    list_csv_4 = list(csv_reader4)
+    factibless += list_csv_4[1:]
 
+for i in range(len(factibless)):
+    for k in range(len(factibless[i])):
+        factibless[i][k] = int(factibless[i][k])
+"""
 
 def factos(conf, fact):
     conf = tuple(conf)
