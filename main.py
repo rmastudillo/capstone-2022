@@ -5,7 +5,6 @@ from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
 from ciw import trackers
-from matplotlib import pyplot as plt
 from funcion_generadora_data import generacion_data_replica_n
 import random
 import numpy as np
@@ -157,7 +156,7 @@ class Simulacion:
     Y_bar_i = np.array
     _arrive_time = 0
 
-    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30, horario=0, tiempo_simulando=24*30*10, enfriamiento= 0):
+    def __init__(self, nueva_configuracion=np.zeros(13), transi=24*30, horario=0, tiempo_simulando=24*30*3, enfriamiento= 24*10):
         self.nueva_configuracion = nueva_configuracion
         self.transitorio = transi
         self.tiempo_simulando = tiempo_simulando
@@ -195,6 +194,7 @@ class Simulacion:
                 ciw.dists.NoArrivals(),  # opr_urg_gen2
                 ciw.dists.NoArrivals()  # Otros
             ],
+
             service_distributions=[
                 Arrival_times(),  # Adm
                 Arrival_times(),  # Boxes
@@ -268,11 +268,8 @@ class Simulacion:
         datos_trial = []
         for trial in range(rep):
             ciw.seed(trial)
-            Q = ciw.Simulation(self.N,
-                               node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                           ciw.PSNode],
+            Q = ciw.Simulation(self.N, exact = 8,
+                               node_class=ciw.PSNode,
                                tracker=trackers.NodePopulation())
             # Aca se calibra el programa
 
@@ -293,6 +290,7 @@ class Simulacion:
 
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
+            print(stadisticas)
             datos_trial.append(stadisticas)
 
             """
@@ -349,10 +347,8 @@ class Simulacion:
     def tem_por_nodo(self, espera_nodo=espera_por_nodo):
         datos = defaultdict(dict)
         for nodo in espera_nodo.keys():
-            datos[nodo]['media'] = round(
-                np.mean(espera_nodo[nodo]), 4)
-            datos[nodo]['sd'] = round(
-                np.std(espera_nodo[nodo]), 4)
+            datos[nodo]['media'] =  np.mean(espera_nodo[nodo])
+            datos[nodo]['sd'] = np.std(espera_nodo[nodo])
                 
         #print("Datos tiempo de espera por nodo en el total de las simulaciones")
         # for i in range(1, 14):
@@ -375,17 +371,24 @@ class Simulacion:
 
 sim = Simulacion()
 # sim.transciente()
+
 sim.simular()
+recs = sim.ultimasim.get_all_records()
+inds = sim.ultimasim.nodes[-1].all_individuals
+
+
+
 # sim.tem_por_nodo()
-a = [r.arrival_date for r in sim.recs if r.node == 1]
-a.sort()
+# a = [r.arrival_date for r in sim.recs if r.node == 1]
+# a.sort()
 
-c = [a[i+1]-a[i] for i in range(len(a)-1)]
-
+# c = [a[i+1]-a[i] for i in range(len(a)-1)]
 l = sim.ultimasim.get_all_records()
 
-l_serv = [i.service_time for i in l if i.node == 1]
-
-
-
+l_serv = [i.service_time for i in l if i.node == 2]
+l_wait = [i.waiting_time for i in l if i.node == 2]
 breakpoint()
+
+
+
+# breakpoint()

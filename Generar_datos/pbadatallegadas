@@ -1,0 +1,41 @@
+# lamda_plus = 0.254 # lamda maximo
+
+# m = round(lamda_plus*24*3) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
+# u = np.random.uniform(0,1,m)
+
+# t = [-1/lamda_plus*log(i) for i in u]
+# s = np.cumsum(t)
+# breakpoint()
+
+lamda = function(t){
+
+    if t >= 0 and t <= 7:
+        return 0.13677
+
+    elif t > 7 and t <= 12:
+        r = 0.02346*t - 0.02752
+        return r
+
+    elif t > 12 and t <= 21.5:
+        return 0.254
+
+    else:
+        r = -0.046892*t + 1.2621
+        return r
+}
+
+lamda = function(t){}
+
+B = 24
+lamda_plus = 0.254
+m = round(3*B*lamda_plus)
+
+u = runif(m, 0, 1)
+t = -1/lamda_plus*log(u)
+s = cumsum(t)
+
+s = s[s<B]
+nstar = length(s)
+
+W = runif(nstar, 0, 1)
+ind = (W <= lamda(s)/lamda_plus)

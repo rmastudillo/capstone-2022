@@ -4,6 +4,7 @@ from turtle import shape
 from types import NoneType
 import numpy as np
 import matplotlib.pyplot as plt
+from math import log
 # ejemplo
 
 
@@ -137,30 +138,100 @@ def func_pers_tpos_hosp(u_actual= ""):
         a = dist_desde_otros_prom() 
         return a 
 
-def t_llegada_entre_pacientes(tpo_actual_aux):
-
-    tpo_actual_aux = 0
-    
-    return np.random.exponential(0.3845)
-    """
-    Esto retorna cuanto tiempo se demora el siguiente paciente en llega
-    no necesita saber el tiempo actual
-    ejemplo:
-    el primer paciente llega en t=0
-    -> se llama t_llegada_entre_pacientes para determinar la llegada del paciente 2
-    retorna 1.5 -> entonces llega en t=1.5 (lo calcula la simulacion)
-    se llama t_llegada_entre_pacientes para determinar la llegada del paciente 3
-    retorna 1.5 -> entonces llega en t=3 (lo calcula la simulacion)
+def lista_t_entre_llegadas(N_pacientes):
+    """ 
+    b: el intervalo de tiempo que se simulara, (0, b]
     """
     
-    """Ahora, recibe tpo_actual_aux, el cual en base al tiempo actual de llegada """
-    # if tpo_actual_aux % 24 < 7.0:  # Hora valle
-    #     # parametro para horario entre 00 y 6:59, calculado con ventana de 16 horas
-    #     return np.random.exponential(7.31)
+    b = N_pacientes/0.2
 
-    # else:
-    #     # parametro para horario entre 7 y 23:59
-    #     return np.random.exponential(3.935)
+    def tasa_no_homo(t):
+        hora = t % 24
+        if hora >= 0 and hora <= 7:
+            return 0.13677
+
+        elif hora > 7 and hora <= 12:
+            r = 0.02346*hora - 0.02752
+            return r
+
+        elif hora > 12 and hora <= 21.5:        
+            return 0.254
+
+        else:
+            r = -0.046892*hora + 1.2621
+            return r
+    
+    """
+    Parte Homogenea:
+    1) crear los intervalos y los visualizamos
+    """
+
+    i = 0
+    y = []
+    dt = []
+    
+    while i <= b:
+        pto = tasa_no_homo(i)
+        y.append(pto)
+        dt.append(round(i,3))
+        i += 0.1
+
+    """
+    Lamda_plus representa el maximo de la tasa de llegada variable
+    m: representa el numero de datos que generaremos, el cual debe ser
+       mayor que la cantidad de personas esperadas entre (0,b]
+    """
+    lamda_plus = 0.254 
+    m = round(lamda_plus*b*5) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
+    
+    u = np.random.uniform(0,1,m)
+    t = [round((-1/lamda_plus)*log(i), 3) for i in u]
+
+    p = 0
+    s1 = []
+    for i in t:
+        p += i
+        s1.append(p)
+        pass
+
+    s2 = [n for n in s1 if n <= b]
+    nstar = len(s2)
+
+    w = np.random.uniform(0,1,size = nstar)
+
+    lol = []
+    t_entre_llegadas = []
+    for i in range(len(w)):
+        lam = s2[i]
+        lam1 = tasa_no_homo(lam)/lamda_plus
+        k = w[i]
+        # print('lam', lam1)
+        # print('k', k)
+
+        bul = (k <= lam1)
+        lol.append(bul)
+        if bul:
+            t_entre_llegadas.append(t[i])
+            
+
+    ind = [i*1 for i in lol]
+
+    x = sum(ind)
+    Nt1 = [i for i in range(x)]
+
+    j = [i for i in range(len(ind)) if ind[i] == 1]
+
+    horas_llegada_pacientes = [s2[i] for i in j]
+
+    eje_y = [0] + Nt1 + [max(Nt1)]
+    eje_x = [0] + horas_llegada_pacientes + [b]
+    #plt.step(eje_x, eje_y)
+
+    # plt.hist(t_entre_llegadas)
+    # plt.show()
+
+    return t_entre_llegadas
+
 
 
 

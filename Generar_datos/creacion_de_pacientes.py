@@ -5,11 +5,12 @@ from tiempos_atencion import *
 import csv
 
 
+
 """
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar
 """
-N_pacientes = 10000
+N_pacientes = 300
 """
 """
 posibilidades = ['URG101_003', 'DIV101_703', 'DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107',
@@ -73,20 +74,20 @@ def calcular_tiempo_atencion(u_actual):
 
 
 def crear_pacientes(N_pacientes, posibilidades):
+    b = round(N_pacientes/0.2) #Este es el tiempo estimado en que lleguen N_pacientes. Es decir, el tiempo esperado en que lleguen N_pacientes será b.
+    l_tiempo_entre_llegadas = lista_t_entre_llegadas(N_pacientes)
+    print(b/24)
+    print(len(l_tiempo_entre_llegadas), N_pacientes)
+    breakpoint()
     pacientes = []
     tiempo = 0
-    tpo_actual_aux = 0
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
             'Paciente', ['n_recorrido', 'i_recorrido', 't_llegada', 't_atencion'])
         # Aca, se genera un intervalo de tiempo entre llegadas, segun la hora actual
-        tiempo = t_llegada_entre_pacientes(tpo_actual_aux)
+        tiempo = l_tiempo_entre_llegadas[_i]
         paciente.t_llegada = tiempo  # Aca, se le asigna la hora de llegada al paciente
-        # Aqui, avanzaremos la variable auxiliar de tpo actual, para decidir cuando cambiar la tasa de atencion.
-        tpo_actual_aux += tiempo
-        # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
-        # en otro caso, la otra tasa
  
         l_tpo_pers = ['OPR102_001', 'OPR101_011', 'OPR102_003', 'OPR101_033', 'DIV103_204', 'DIV101_703']
         l_hosp = ['DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107', 'DIV104_602', 'DIV103_204']
