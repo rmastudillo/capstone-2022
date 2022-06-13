@@ -10,8 +10,9 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-N_pacientes = 10000
-N_bdd = 30
+N_pacientes = round(0.13*24*30*36)
+
+N_bdd = 8
 
 """
 Crear carpetas
@@ -89,18 +90,32 @@ def uniquify(path):
 
 
 def crear_pacientes(N_pacientes, posibilidades):
+    """
+    Se estan generando los tiempos entre pacientes
+    """
+    tiempo_simulacion = 24*30*36
+    l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+    generando_tiempos = True
+    while generando_tiempos:
+        try:
+            l_tiempo_entre_llegadas[N_pacientes]
+            generando_tiempos = False
+        except:
+            print("no habian suficientes pacientes generados")
+            l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+
     pacientes = []
     tiempo = 0
-    tpo_actual_aux = 0
+
     for _i in range(0, N_pacientes):
         u_actual = 'URG101_003'
         paciente = namedtuple(
             'Paciente', ['n_recorrido', 'i_recorrido', 't_llegada', 't_atencion'])
         # Aca, se genera un intervalo de tiempo entre llegadas, segun la hora actual
-        tiempo = t_llegada_entre_pacientes(tpo_actual_aux)
+        tiempo = l_tiempo_entre_llegadas[_i]
         paciente.t_llegada = tiempo  # Aca, se le asigna la hora de llegada al paciente
         # Aqui, avanzaremos la variable auxiliar de tpo actual, para decidir cuando cambiar la tasa de atencion.
-        tpo_actual_aux += tiempo
+
         # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
         # en otro caso, la otra tasa
 

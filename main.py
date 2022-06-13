@@ -1,6 +1,7 @@
 from bdb import Breakpoint
 from collections import defaultdict
 from email.policy import default
+from reprlib import recursive_repr
 from statistics import NormalDist
 from tkinter.ttk import Progressbar
 import ciw
@@ -21,14 +22,12 @@ from media_movil import media_movil_ayudantia
 ESTO CAMBIA EL PERIODO 
 """
 
-TRANSIENTE = 24*7*20
-SIMULANDO = 24*7*20
+TRANSIENTE = 24*30*12
+SIMULANDO = 24*30
 
 """
 ESTO CAMBIA EL PERIODO 
 """
-
-
 
 
 my_path = os.path.abspath(os.path.dirname(__file__))
@@ -379,6 +378,8 @@ class Simulacion:
                     waits.append(r.waiting_time)
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
+            print(stadisticas)
+            breakpoint()
             self.datos_trial.append(stadisticas)
             print("TERMINE LA ITERACION")
 
@@ -512,14 +513,17 @@ class Simulacion:
         breakpoint()
 
 
-#sim = Simulacion()
+sim = Simulacion()
 # sim.transciente()
 
 # sim.transciente()
 # breakpoint()
-# sim.simular(rep=3)
-# print(sim.historial_replicas)
-# breakpoint()
+sim.simular(rep=7)
+print(sim.historial_replicas)
+recs = sim.Q.get_all_records()
+llegada = [r.arrival_date for r in recs if r.node == 1]
+sim.print_datos_nodos(sim.historial_simulacion_nodos[0][0])
+breakpoint()
 # Una nueva simulacion NO DEBE TENER INI
 #recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()

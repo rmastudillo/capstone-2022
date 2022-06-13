@@ -4,10 +4,12 @@ from turtle import shape
 from types import NoneType
 import numpy as np
 import matplotlib.pyplot as plt
+from math import log
 # ejemplo
 
 
 def dist_promedio():
+
     """
     Comportamiento promedio de paciente que sale de una opr. Lo modelamos asi
     por la falta de datos (que quedan en 0 por el end...), lo cual nos llevaria a sub estimar los tiempos.
@@ -17,103 +19,98 @@ def dist_promedio():
     """
     p = random.random()
     if p <= 0.51:
-        a = np.random.gamma(shape=1.33548, scale=18.86)
+        a = np.random.gamma(shape = 1.33548, scale = 18.86)
         while a > float(72) or a < 0.1:
-            a = np.random.gamma(shape=1.33548, scale=18.86)
-
+            a = np.random.gamma(shape = 1.33548, scale = 18.86)
+            
         return a
 
     else:
-        a = np.random.normal(loc=179.259, scale=45.22)
+        a = np.random.normal(loc = 179.259, scale = 45.22 )
         while a < float(72) or a > 290:
-            a = np.random.normal(loc=179.259, scale=45.22)
-
+            a = np.random.normal(loc = 179.259, scale = 45.22 )
+        
         return a
-
 
 def dist_desde_opr_033():
     p = random.random()
     if p <= 0.389:
-        a = np.random.normal(loc=35.96, scale=21.34)
+        a = np.random.normal(loc = 35.96, scale = 21.34)
         while a > 72 or a <= 0:
-            a = np.random.normal(loc=35.96, scale=21.34)
-
+            a = np.random.normal(loc = 35.96, scale = 21.34)
+        
         return a
-
+    
     else:
-        a = np.random.normal(loc=178.35, scale=46.88)
+        a =  np.random.normal(loc = 178.35, scale = 46.88)
         while a < 72 or a > 290:
-            a = np.random.normal(loc=178.35, scale=46.88)
+            a =  np.random.normal(loc = 178.35, scale = 46.88)
 
         return a
-
 
 def dist_desde_opr102_003():
     p = random.random()
     if p <= 0.9:
-        a = np.random.gamma(shape=0.797, scale=14.038)
+        a = np.random.gamma(shape = 0.797, scale = 14.038)
         while a > 24 or a <= 0:
-            a = np.random.gamma(shape=0.797, scale=14.038)
+            a = np.random.gamma(shape = 0.797, scale = 14.038)
 
         return a
-
+    
     else:
-        a = np.random.normal(loc=167.61, scale=30)
+        a = np.random.normal(loc = 167.61, scale = 30)
         while a < 24 or a > 210:
-            a = np.random.normal(loc=167.61, scale=30)
+            a = np.random.normal(loc = 167.61, scale = 30)
         return a
-
 
 def dist_desde_div103_204():
     a = 0
-    while a <= 0.05 or a >= 500:  # min y max de los datos
-        a = np.random.lognormal(mean=4.992, sigma=0.819)
-
-    return a
-
+    while a <= 0.05 or a  >= 500: #min y max de los datos 
+        a = np.random.lognormal(mean = 4.992, sigma = 0.819)
+    
+    return a 
 
 def dist_desde_div101_703():
     p = random.random()
-    if p <= 0.24:  # prop de gente q se queda menos de 9 hrs
+    if p <= 0.24: #prop de gente q se queda menos de 9 hrs
         a = 0
         while a < 0.4 or a >= 9:
-            a = np.random.lognormal(mean=0.8061370, sigma=0.6801976)
+            a = np.random.lognormal(mean = 0.8061370, sigma = 0.6801976)
         return a
 
     elif p > 0.24 and p <= 0.532:
         a = 0
         while a < 9 or a >= 34.13:
-            a = np.random.gamma(shape=10.8779044, scale=1.66477)
+            a = np.random.gamma(shape = 10.8779044, scale = 1.66477)
         return a
-
+    
     else:
         a = 0
         while a < 36.62 or a >= 720.0:
-            a = np.random.lognormal(mean=4.92, sigma=0.94)
+            a = np.random.lognormal(mean = 4.92, sigma = 0.94)
             return a
-
 
 def dist_desde_otros_prom():
     a = 0
     while a < 0.1 or a > 3.5:
-        a = np.random.normal(loc=2.64, scale=1.8)
+        a = np.random.normal(loc = 2.64, scale = 1.8)
     return a
 
 
-def func_pers_tpos_hosp(u_actual=""):
+def func_pers_tpos_hosp(u_actual= ""):
 
-    if u_actual == "OPR102_001":
+    if u_actual == "OPR102_001": 
         a = dist_promedio()
         return a
 
     elif u_actual == 'OPR101_033':
         a = dist_desde_opr_033()
-
+        
         return a
-
+    
     elif u_actual == "OPR102_003":
         a = dist_desde_opr102_003()
-
+        
         return a
 
     elif u_actual == "OPR101_011":
@@ -121,12 +118,12 @@ def func_pers_tpos_hosp(u_actual=""):
         Dado que solo cuenta con 2 datos, asumimos que tendra distribucion promedio
         """
         a = dist_promedio()
-
+        
         return a
 
     elif u_actual == 'DIV101_703':
         a = dist_desde_div101_703()
-
+        
         return a
 
     elif u_actual == 'DIV103_204':
@@ -138,34 +135,105 @@ def func_pers_tpos_hosp(u_actual=""):
         return a
 
     else:
-        a = dist_desde_otros_prom()
-        return a
+        a = dist_desde_otros_prom() 
+        return a 
 
-
-def t_llegada_entre_pacientes(tpo_actual_aux):
-
-    tpo_actual_aux = 0
-
-    return np.random.exponential(1/0.254)
+def lista_t_entre_llegadas(tiempo_simulacion):
+    """ 
+    b: el intervalo de tiempo que se simulara, (0, b]
     """
-    Esto retorna cuanto tiempo se demora el siguiente paciente en llega
-    no necesita saber el tiempo actual
-    ejemplo:
-    el primer paciente llega en t=0
-    -> se llama t_llegada_entre_pacientes para determinar la llegada del paciente 2
-    retorna 1.5 -> entonces llega en t=1.5 (lo calcula la simulacion)
-    se llama t_llegada_entre_pacientes para determinar la llegada del paciente 3
-    retorna 1.5 -> entonces llega en t=3 (lo calcula la simulacion)
+    
+    b = tiempo_simulacion
+
+    def tasa_no_homo(t):
+        hora = t % 24
+        if hora >= 0 and hora <= 7:
+            return 0.13677
+
+        elif hora > 7 and hora <= 12:
+            r = 0.02346*hora - 0.02752
+            return r
+
+        elif hora > 12 and hora <= 21.5:        
+            return 0.254
+
+        else:
+            r = -0.046892*hora + 1.2621
+            return r
+    
+    """
+    Parte Homogenea:
+    1) crear los intervalos y los visualizamos
     """
 
-    """Ahora, recibe tpo_actual_aux, el cual en base al tiempo actual de llegada """
-    # if tpo_actual_aux % 24 < 7.0:  # Hora valle
-    #     # parametro para horario entre 00 y 6:59, calculado con ventana de 16 horas
-    #     return np.random.exponential(7.31)
+    i = 0
+    y = []
+    dt = []
+    
+    while i <= b:
+        pto = tasa_no_homo(i)
+        y.append(pto)
+        dt.append(round(i,3))
+        i += 0.1
 
-    # else:
-    #     # parametro para horario entre 7 y 23:59
-    #     return np.random.exponential(3.935)
+    """
+    Lamda_plus representa el maximo de la tasa de llegada variable
+    m: representa el numero de datos que generaremos, el cual debe ser
+       mayor que la cantidad de personas esperadas entre (0,b]
+    """
+    lamda_plus = 0.254 
+    m = round(lamda_plus*b*5) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
+    
+    u = np.random.uniform(0,1,m)
+    t = [round((-1/lamda_plus)*log(i), 3) for i in u]
+
+    p = 0
+    s1 = []
+    for i in t:
+        p += i
+        s1.append(p)
+        pass
+
+    s2 = [n for n in s1 if n <= b]
+    nstar = len(s2)
+
+    w = np.random.uniform(0,1,size = nstar)
+
+    lol = []
+    t_entre_llegadas = []
+    for i in range(len(w)):
+        lam = s2[i]
+        lam1 = tasa_no_homo(lam)/lamda_plus
+        k = w[i]
+        # print('lam', lam1)
+        # print('k', k)
+
+        bul = (k <= lam1)
+        lol.append(bul)
+        if bul:
+            t_entre_llegadas.append(t[i])
+            
+
+    ind = [i*1 for i in lol]
+
+    x = sum(ind)
+    Nt1 = [i for i in range(x)]
+
+    j = [i for i in range(len(ind)) if ind[i] == 1]
+
+    horas_llegada_pacientes = [s2[i] for i in j]
+
+    eje_y = [0] + Nt1 + [max(Nt1)]
+    eje_x = [0] + horas_llegada_pacientes + [b]
+    #plt.step(eje_x, eje_y)
+
+    # plt.hist(t_entre_llegadas)
+    # plt.show()
+
+    return t_entre_llegadas
+
+
+
 
 
 def t_urg101003():
@@ -184,7 +252,6 @@ def t_div101703():
     
 """
 
-
 def t_div101603(u_actual=''):
     return func_pers_tpos_hosp(u_actual)
 
@@ -193,21 +260,23 @@ def t_div101604(u_actual=''):
 
     return func_pers_tpos_hosp(u_actual)
 
-
 def t_div102203(u_actual=''):
     return func_pers_tpos_hosp(u_actual)
+
 
 
 def t_div103107(u_actual=''):
     return func_pers_tpos_hosp(u_actual)
 
 
+
 def t_div104602(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
+   return func_pers_tpos_hosp(u_actual)
 
 
 def t_div103204(u_actual=''):
     return func_pers_tpos_hosp(u_actual)
+
 
 
 def t_opr102001():
@@ -236,21 +305,3 @@ def t_end():
 
 def random_gama():
     return np.random.gamma(shape=25.155, scale=4.542125)
-
-
-# tiempo = 0
-# tpos = []
-# for i in range(24*30):
-#     tpos.append(tiempo)
-#     tiempo2 = round(t_llegada_entre_pacientes(tiempo), 4)
-#     tiempo += tiempo2
-# l = []
-# for i in range(len(tpos)-1):
-
-#     j = i+1
-#     k = j-1
-
-#     t1 = tpos[j]
-#     t0 = tpos[k]
-
-#     l.append(t1-t0)
