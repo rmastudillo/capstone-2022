@@ -27,9 +27,9 @@ os.makedirs(dir_path_old, exist_ok=True)
 """
 posibilidades = ['URG101_003', 'DIV101_703', 'DIV101_603', 'DIV101_604', 'DIV102_203', 'DIV103_107',
                  'DIV104_602', 'DIV103_204', 'OPR102_001', 'OPR101_011', 'OPR102_003', 'OPR101_033', 'Otro', 'End']
-areas = {'URG101_003': [], 'DIV101_703': [], 'DIV101_603': [], 'DIV101_604': [], 'DIV102_203': [], 'DIV103_107': [],
-         'DIV104_602': [], 'DIV103_204': [], 'OPR102_001': [], 'OPR101_011': [], 'OPR102_003': [], 'OPR101_033': [],
-         'Otro': [], 'End': [],
+areas = {'URG101_003': [1], 'DIV101_703': [2], 'DIV101_603': [8], 'DIV101_604': [3], 'DIV102_203': [4], 'DIV103_107': [5],
+         'DIV104_602': [6], 'DIV103_204': [7], 'OPR102_001': [9], 'OPR101_011': [10], 'OPR102_003': [11], 'OPR101_033': [12],
+         'Otro': [13], 'End': [14],
          }
 t_atencion = {'URG101_003': t_urg101003,
               'DIV101_703': t_div101703,
@@ -61,7 +61,6 @@ Fin de agregación de supuestos
 """
 _indice_dic = 1  # Aqui se define si el primer nodo es el 0 o el 1, en este caso es el 1
 for key in areas.keys():
-    areas[key].append(_indice_dic)
     areas[key].append(Matriz_procesada[_indice_dic-1])
     _indice_dic += 1
 

@@ -136,7 +136,22 @@ class Simulacion:
     enfriamiento = es el tiempo en que va limpiando la simulación, es necesario para la librería,
     no se considera en la recolección de datos
     """
-
+    """
+    ORDEN
+    1 |URG101_003
+    2 |DIV101_703
+    3 |DIV101_603
+    4 |DIV101_604
+    5 |DIV102_203
+    6 |DIV103_107
+    7 |DIV104_602
+    8 |DIV103_204
+    9 |OPR102_001
+    10|OPR101_011
+    11|OPR102_003
+    12|OPR101_033
+    13|Otro
+    """
     base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
     #base = [5, 8, 8, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
 
@@ -379,6 +394,18 @@ class Simulacion:
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
             print(stadisticas)
+
+            for i in range(13):
+                try:
+                    a = [(r.id_number, r.service_time)
+                         for r in recs if r.node == i]
+                    b = np.mean([r.service_time for r in recs if r.node == i])
+                    c = np.std([r.service_time for r in recs if r.node == i])
+                    a.sort(key=lambda x: x[0])
+                    print(a[0], "NODO ", i, "media =", b, "desviacion", c)
+                except:
+                    continue
+
             breakpoint()
             self.datos_trial.append(stadisticas)
             print("TERMINE LA ITERACION")
