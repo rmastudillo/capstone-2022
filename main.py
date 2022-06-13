@@ -22,7 +22,7 @@ from media_movil import media_movil_ayudantia
 ESTO CAMBIA EL PERIODO 
 """
 
-TRANSIENTE = 24*30*12
+TRANSIENTE = 24*30
 SIMULANDO = 24*30
 
 """
@@ -240,7 +240,7 @@ class Simulacion:
         self.tiempo_simulando = tiempo_simulando
         self.ultimopedazo = tiempo_simulando + transi
         self.tiempo_total = transi + tiempo_simulando + enfriamiento
-
+        self.tiempo_total = 20*30
         """
         Listas para guardar datos
         """
@@ -394,6 +394,7 @@ class Simulacion:
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
             print(stadisticas)
+            """
 
             for i in range(13):
                 try:
@@ -405,7 +406,7 @@ class Simulacion:
                     print(a[0], "NODO ", i, "media =", b, "desviacion", c)
                 except:
                     continue
-
+            """
             breakpoint()
             self.datos_trial.append(stadisticas)
             print("TERMINE LA ITERACION")

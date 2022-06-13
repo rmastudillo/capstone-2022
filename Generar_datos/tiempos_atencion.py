@@ -70,10 +70,10 @@ def dist_desde_div103_204():
     a = 0
     if p <= 0.29:
         while a <= 0.05 or a >= 24:  # min y max de los datos
-            a = np.random.normal(loc=11.675, scale=6.44)
+            a = np.random.normal(loc=12, scale=8)
     else:
         while a <= 90.5 or a >= 547:  # min y max de los datos
-            a = np.random.normal(loc=11.675, scale=6.44)
+            a = np.random.normal(loc=283, scale=189)
         return a
 
 
