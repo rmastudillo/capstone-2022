@@ -11,19 +11,18 @@ def lista_t_entre_llegadas(N_pacientes):
     """
     b = N_pacientes/0.13677
     
-
-
     def tasa_no_homo(t):
         hora = t % 24
+        
         if hora >= 0 and hora <= 7:
-            return 0.13677
+            return 0.254
 
         elif hora > 7 and hora <= 12:
             r = 0.02346*hora - 0.02752
             return r
 
         elif hora > 12 and hora <= 21.5:        
-            return 0.254
+            return 0.13677
 
         else:
             r = -0.046892*hora + 1.2621

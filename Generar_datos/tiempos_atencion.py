@@ -142,7 +142,7 @@ def lista_t_entre_llegadas(N_pacientes):
     """ 
     b: el intervalo de tiempo que se simulara, (0, b]
     """
-    
+
     b = N_pacientes/0.2
 
     def tasa_no_homo(t):
@@ -181,6 +181,7 @@ def lista_t_entre_llegadas(N_pacientes):
     m: representa el numero de datos que generaremos, el cual debe ser
        mayor que la cantidad de personas esperadas entre (0,b]
     """
+
     lamda_plus = 0.254 
     m = round(lamda_plus*b*5) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
     
@@ -231,8 +232,6 @@ def lista_t_entre_llegadas(N_pacientes):
     # plt.show()
 
     return t_entre_llegadas
-
-
 
 
 
