@@ -12,7 +12,7 @@ def dist_promedio():
     """
     Comportamiento promedio de paciente que sale de una opr. Lo modelamos asi
     por la falta de datos (que quedan en 0 por el end...), lo cual nos llevaria a sub estimar los tiempos.
-    Se modela segmentando la permanencia de los pacientes en: 
+    Se modela segmentando la permanencia de los pacientes en:
         1) menos de 72 hrs (3 dias), lo cual ocurre el 51% de las veces
         2) mas de 72 hrs, lo cual representa el resto de posibilidades (entre 72 y 290 hrs)
     """
@@ -74,7 +74,7 @@ def dist_desde_div103_204():
     else:
         while a <= 90.5 or a >= 547:  # min y max de los datos
             a = np.random.normal(loc=283, scale=189)
-        return a
+    return a
 
 
 def dist_desde_div101_703():
@@ -148,7 +148,7 @@ def func_pers_tpos_hosp(u_actual=""):
 
 
 def lista_t_entre_llegadas(tiempo_simulacion):
-    """ 
+    """
     b: el intervalo de tiempo que se simulara, (0, b]
     """
 
@@ -158,18 +158,14 @@ def lista_t_entre_llegadas(tiempo_simulacion):
         hora = t % 24
         if hora >= 0 and hora <= 7:
             return 0.13677
-
         elif hora > 7 and hora <= 12:
             r = 0.02346*hora - 0.02752
             return r
-
         elif hora > 12 and hora <= 21.5:
             return 0.254
-
         else:
             r = -0.046892*hora + 1.2621
             return r
-
     """
     Parte Homogenea:
     1) crear los intervalos y los visualizamos

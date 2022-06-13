@@ -21,9 +21,9 @@ from media_movil import media_movil_ayudantia
 """
 ESTO CAMBIA EL PERIODO 
 """
-
-TRANSIENTE = 24*30
-SIMULANDO = 24*30
+# 24*30*72
+TRANSIENTE = 24*30*2
+SIMULANDO = 24*30*3
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -86,6 +86,8 @@ class Service_times(ciw.dists.Distribution):
         # print(index,"AAA")
         tiempo = pacientes[index].tiempo_atencion[nodo_tiempo[index]]
         nodo_tiempo[index] += 1
+        tiempo = np.round(tiempo, decimals=5)
+        tiempo = np.float64(tiempo)
         return tiempo
 
 
@@ -240,7 +242,6 @@ class Simulacion:
         self.tiempo_simulando = tiempo_simulando
         self.ultimopedazo = tiempo_simulando + transi
         self.tiempo_total = transi + tiempo_simulando + enfriamiento
-        self.tiempo_total = 20*30
         """
         Listas para guardar datos
         """
@@ -328,11 +329,8 @@ class Simulacion:
 
     def crear_simulacion(self, N):
         self.Q = ciw.Simulation(N,
-                                node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                            ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                            ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                            ciw.PSNode],
-                                tracker=trackers.NodePopulation(), exact=5)
+                                node_class=ciw.Node,
+                                tracker=trackers.SystemPopulation(), exact=5)
 
     def simular(self, nueva_configuracion=np.zeros(13), ini=0, rep=2):
         """
@@ -378,36 +376,47 @@ class Simulacion:
             """
 
             recs = self.Q.get_all_records()
-            waits = []
-            for r in recs:
-                """
-                Filtros
-                """
+            waits = [r.waiting_time for r in recs if r.arrival_date >
+                     self.transitorio and r.arrival_date < self.ultimopedazo]
+            arrival = []
 
-                if not (r.node == 14 or r.node == 13) and (r.arrival_date > self.transitorio and r.arrival_date < self.ultimopedazo):
-                    self.datos_tiempo.append(r.waiting_time)
-                    self.espera_por_nodo[str(
-                        r.node)].append(r.waiting_time)
-                    self.espera_sim_por_nodo[str(trial)][str(
-                        r.node)].append(r.waiting_time)
-                    waits.append(r.waiting_time)
+            #
+            # for r in recs:
+            #    """
+            #    Filtros
+            #    """
+            #    if r.node == 1:
+            #        arrival.append(r.arrival_date)
+            #    if not (r.node == 14 or r.node == 13) and (r.arrival_date > self.transitorio and r.arrival_date < self.ultimopedazo):
+            #        self.datos_tiempo.append(r.waiting_time)
+            #        self.espera_por_nodo[str(
+            #            r.node)].append(r.waiting_time)
+            #        self.espera_sim_por_nodo[str(trial)][str(
+            #            r.node)].append(r.waiting_time)
+            #        waits.append(r.waiting_time)
+
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
-            print(stadisticas)
-            """
-
+            # arrival.sort()
+            # self.datos_trial.append(stadisticas)
+            # tiempos_entre_llegadas = [arrival[i+1]-arrival[i]
+            #                          for i in range(len(arrival)-1)]
+#
+            print("TERMINE LA ITERACION, simiule ",
+                  self.tiempo_total, " horas")
+            print(self.Q.statetracker.history)
+            breakpoint()
             for i in range(13):
                 try:
-                    a = [(r.id_number, r.service_time)
+                    a = [(r.id_number, r.waiting_time)
                          for r in recs if r.node == i]
                     b = np.mean([r.service_time for r in recs if r.node == i])
                     c = np.std([r.service_time for r in recs if r.node == i])
                     a.sort(key=lambda x: x[0])
-                    print(a[0], "NODO ", i, "media =", b, "desviacion", c)
+                    print("NODO ", i, "media =", b, "desviacion", c)
                 except:
                     continue
-            """
-            breakpoint()
+
             self.datos_trial.append(stadisticas)
             print("TERMINE LA ITERACION")
 
@@ -432,7 +441,7 @@ class Simulacion:
             self.tem_por_nodo(self.espera_por_nodo))
 
         """
-        2) b)
+        2) b) por replica, guarda todas las replicas de la simulacion
         """
         lista_datos_trial = []
         for i in range(0, rep):

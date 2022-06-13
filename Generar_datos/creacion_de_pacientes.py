@@ -10,9 +10,11 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-N_pacientes = round(0.13*24*30*36)
+tiempo_simulacion = 24*30*12
+N_pacientes = round(0.13*tiempo_simulacion)
 
-N_bdd = 8
+
+N_bdd = 30
 
 """
 Crear carpetas
@@ -54,8 +56,8 @@ Agregando los supuestos de que todos pasan de admision al box y que de otro a sa
 """
 Matriz_procesada[0] = [0.0, 1, 0.0, 0.0, 0.0, 0.0,
                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+#Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+#                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 """
 Fin de agregación de supuestos
 """
@@ -92,7 +94,7 @@ def crear_pacientes(N_pacientes, posibilidades):
     """
     Se estan generando los tiempos entre pacientes
     """
-    tiempo_simulacion = 24*30*36
+
     print("ESNTRE A ")
     l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
     print("SALI")
@@ -104,7 +106,8 @@ def crear_pacientes(N_pacientes, posibilidades):
 
             generando_tiempos = False
         except:
-            print("no habian suficientes pacientes generados")
+            print("no habian suficientes pacientes generados",
+                  len(l_tiempo_entre_llegadas), " < ", N_pacientes)
             l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
     pacientes = []
     tiempo = 0
