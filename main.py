@@ -73,6 +73,10 @@ Defino función para elegir la ruta de los pacientes
 """
 
 
+class Dicionariorichi(defaultdict):
+    pass
+
+
 nodo_tiempo = defaultdict(int)
 
 
@@ -138,22 +142,7 @@ class Simulacion:
     enfriamiento = es el tiempo en que va limpiando la simulación, es necesario para la librería,
     no se considera en la recolección de datos
     """
-    """
-    ORDEN
-    1 |URG101_003
-    2 |DIV101_703
-    3 |DIV101_603
-    4 |DIV101_604
-    5 |DIV102_203
-    6 |DIV103_107
-    7 |DIV104_602
-    8 |DIV103_204
-    9 |OPR102_001
-    10|OPR101_011
-    11|OPR102_003
-    12|OPR101_033
-    13|Otro
-    """
+
     base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
     #base = [5, 8, 8, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
 
@@ -205,9 +194,9 @@ class Simulacion:
     """
     Transitorios 
     """
-    espera_sim_por_nodo = defaultdict(lambda: defaultdict(list))
+    espera_sim_por_nodo = Dicionariorichi(lambda: defaultdict(list))
 
-    espera_por_nodo = defaultdict(list)
+    espera_por_nodo = Dicionariorichi(list)
 
     Y_bar_i = np.array
     _arrive_time = 0
@@ -369,7 +358,7 @@ class Simulacion:
             self.Q.simulate_until_max_time(self.tiempo_total)
             self.base_actual += 1  # ya simule en el archivo trial
             global nodo_tiempo
-            nodo_tiempo = defaultdict(int)
+            nodo_tiempo = Dicionariorichi(int)
             """
             # Comienza el registro de datos, la simulacion actual
             está en self.Q
@@ -377,7 +366,16 @@ class Simulacion:
 
             recs = self.Q.get_all_records()
             waits = [r.waiting_time for r in recs if r.node != 13 and (r.arrival_date >
-                     self.transitorio )]
+                     self.transitorio)]
+            for i in range(1, 13):
+                waits_i = [r.waiting_time for r in recs if r.node ==
+                           i and (r.arrival_date > self.transitorio)]
+                self.espera_por_nodo[str(i)] += waits_i
+                self.espera_por_nodo[str(i)] += waits_i
+                self.espera_sim_por_nodo[str(trial)][str(i)] += waits_i
+
+            self.datos_tiempo += waits
+
             arrival = []
 
             #
@@ -397,6 +395,7 @@ class Simulacion:
 
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
+
             # arrival.sort()
             self.datos_trial.append(stadisticas)
             # tiempos_entre_llegadas = [arrival[i+1]-arrival[i]
@@ -404,8 +403,7 @@ class Simulacion:
 #
             print("TERMINE LA ITERACION, simiule ",
                   self.tiempo_total, " horas")
-            print(self.Q.statetracker.history)
-            breakpoint()
+            """
             for i in range(13):
                 try:
                     a = [(r.id_number, r.waiting_time)
@@ -416,8 +414,7 @@ class Simulacion:
                     print("NODO ", i, "media =", b, "desviacion", c)
                 except:
                     continue
-
-            self.datos_trial.append(stadisticas)
+            """
             print("TERMINE LA ITERACION")
 
         """
@@ -444,10 +441,11 @@ class Simulacion:
         2) b) por replica, guarda todas las replicas de la simulacion
         """
         lista_datos_trial = []
-        for i in range(0, rep):
+        for i in range(1, rep):
             lista_datos_trial.append(self.tem_por_nodo(
                 self.espera_sim_por_nodo[str(i)]))
         if ini == 0:
+            print("estoy guadando una replica")
             self.historial_simulacion_nodos.append(lista_datos_trial)
         else:
             self.historial_simulacion_nodos[self.simulacion_actual] = lista_datos_trial
@@ -468,7 +466,7 @@ class Simulacion:
         self.reiniciar_registros()
 
     def tem_por_nodo(self, espera_nodo=espera_por_nodo):
-        datos = defaultdict(dict)
+        datos = Dicionariorichi(dict)
         for nodo in espera_nodo.keys():
             datos[nodo]['media'] = np.mean(espera_nodo[nodo])
             datos[nodo]['sd'] = np.std(espera_nodo[nodo])
@@ -477,15 +475,26 @@ class Simulacion:
         #    print("Nodo {} = ".format(i), datos[str(i)])
         return datos
 
-    def print_datos_nodos(self, dict_nodos):
+    def printd(self, dict_nodos):
         print(
             "Datos tiempo de espera por nodo en el total de los trials en las simulaciones")
-        for i in range(1, 14):
+        for i in range(1, 13):
             print("Nodo {} = ".format(i), dict_nodos[str(i)])
 
+    def prints(self):
+        for sim in range(len(self.historial_simulacion_nodos)):
+
+            for rep in range(len(self.historial_simulacion_nodos[sim])):
+
+                print(
+                    "DATOS simulacion{}, replica numero{}".format(sim, rep)
+                )
+                self.printd(self.historial_simulacion_nodos[sim][rep])
+
     def reiniciar_registros(self):
-        self.espera_sim_por_nodo = defaultdict(lambda: defaultdict(list))
-        self.espera_por_nodo = defaultdict(list)
+        self.espera_sim_por_nodo = Dicionariorichi(
+            lambda: Dicionariorichi(list))
+        self.espera_por_nodo = Dicionariorichi(list)
 
         self.desviacion_standard = 0
         self.medias_simulacion = 0
@@ -525,7 +534,7 @@ class Simulacion:
             Se simula hasta tiempo_total
             """
             global nodo_tiempo
-            nodo_tiempo = defaultdict(int)
+            nodo_tiempo = Dicionariorichi(int)
             Y_i = []
             for _i in range(1, dias_sim):
                 self.Q.simulate_until_max_time(
@@ -550,17 +559,15 @@ class Simulacion:
         breakpoint()
 
 
-sim = Simulacion()
+
 # sim.transciente()
 
 # sim.transciente()
 # breakpoint()
-sim.simular(rep=7)
-print(sim.historial_replicas)
-recs = sim.Q.get_all_records()
-llegada = [r.arrival_date for r in recs if r.node == 1]
-sim.print_datos_nodos(sim.historial_simulacion_nodos[0][0])
-breakpoint()
+
+
+
+
 # Una nueva simulacion NO DEBE TENER INI
 #recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()

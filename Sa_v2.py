@@ -32,6 +32,7 @@ for i in range(len(factibless)):
         factibless[i][k] = int(factibless[i][k])
 """
 
+
 def factos(conf, fact):
     conf = tuple(conf)
     print(conf)
@@ -92,7 +93,7 @@ def simulacion(configuracion, escenarios, sim=Simulacion, n_sim=0):
     return resultado
 
 
-def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alpha=0.99, beta=0.5, sim=Simulacion):
+def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alpha=0.99, beta=0.5, sim=Simulacion,n_replicas=10,replicas_adicionales=2):
 
     accept = 0
 
@@ -100,7 +101,7 @@ def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alp
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     print(len(configuracion))
     # lista de largo cantidad de réplicas
-    valor_actual = simulacion(configuracion_inicial, 3, sim)
+    valor_actual = simulacion(configuracion_inicial, 10, sim)
 
     configuracion_ideal = [2, 3, 3, 1, 3, 2, 4, 3, 1]
     valor_ideal = simulacion(configuracion_ideal, 3, sim, n_sim=1)
@@ -115,10 +116,7 @@ def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alp
     """
     Numero de replicas
     """
-    n_replicas = 2
-    replicas_adicionales = 2
 
-    breakpoint()
 
     """
     Comienza SA
@@ -146,6 +144,7 @@ def SA(NITER=10, Tk=1000, configuracion_inicial=[0, 0, 0, 0, 0, 0, 0, 0, 0], alp
         # cantidad de réplicas, el largo de la lista
         ancho = 1.96*s/np.sqrt(len(valor_vecino))
         intervalo = [mu - ancho, mu + ancho]
+        breakpoint()
 
         if intervalo[1] < 0:
             configuracion = vecino_sa
