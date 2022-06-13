@@ -36,14 +36,14 @@ def dist_desde_opr_033():
     p = random.random()
     if p <= 0.389:
         a = np.random.normal(loc = 35.96, scale = 21.34)
-        while a > 72 or a <= 0:
+        while a > 72 or a <= 1.1:
             a = np.random.normal(loc = 35.96, scale = 21.34)
         
         return a
     
     else:
         a =  np.random.normal(loc = 178.35, scale = 46.88)
-        while a < 72 or a > 290:
+        while a < 93 or a > 290: #Sacando el min y max del intervalo
             a =  np.random.normal(loc = 178.35, scale = 46.88)
 
         return a
@@ -52,7 +52,7 @@ def dist_desde_opr102_003():
     p = random.random()
     if p <= 0.9:
         a = np.random.gamma(shape = 0.797, scale = 14.038)
-        while a > 24 or a <= 0:
+        while a > 24 or a <= 0.05:
             a = np.random.gamma(shape = 0.797, scale = 14.038)
 
         return a
@@ -64,11 +64,15 @@ def dist_desde_opr102_003():
         return a
 
 def dist_desde_div103_204():
+    p = random.random()
     a = 0
-    while a <= 0.05 or a  >= 500: #min y max de los datos 
-        a = np.random.lognormal(mean = 4.992, sigma = 0.819)
-    
-    return a 
+    if p <= 0.29:
+        while a <= 0.05 or a  >= 24: #min y max de los datos 
+            a = np.random.normal(loc = 11.675, scale = 6.44)
+    else:
+        while a <= 90.5 or a  >= 547: #min y max de los datos 
+            a = np.random.normal(loc = 11.675, scale = 6.44)
+        return a 
 
 def dist_desde_div101_703():
     p = random.random()
@@ -78,16 +82,16 @@ def dist_desde_div101_703():
             a = np.random.lognormal(mean = 0.8061370, sigma = 0.6801976)
         return a
 
-    elif p > 0.24 and p <= 0.532:
+    elif p > 0.24 and p <= 0.49:
         a = 0
-        while a < 9 or a >= 34.13:
-            a = np.random.gamma(shape = 10.8779044, scale = 1.66477)
+        while a < 9 or a >= 23.55:
+            a = np.random.gamma(shape = 16.5012, scale = 0.994)
         return a
     
     else:
         a = 0
-        while a < 36.62 or a >= 720.0:
-            a = np.random.lognormal(mean = 4.92, sigma = 0.94)
+        while a < 24 or a >= 720.0:
+            a = np.random.lognormal(mean = 4.79, sigma = 1.0312)
             return a
 
 def dist_desde_otros_prom():
@@ -154,7 +158,7 @@ def lista_t_entre_llegadas(tiempo_simulacion):
             r = 0.02346*hora - 0.02752
             return r
 
-        elif hora > 12 and hora <= 21.5:        
+        elif hora > 12 and hora <= 21.5:
             return 0.254
 
         else:
@@ -182,7 +186,7 @@ def lista_t_entre_llegadas(tiempo_simulacion):
        mayor que la cantidad de personas esperadas entre (0,b]
     """
     lamda_plus = 0.254 
-    m = round(lamda_plus*b*5) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
+    m = round(lamda_plus*b*3) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
     
     u = np.random.uniform(0,1,m)
     t = [round((-1/lamda_plus)*log(i), 3) for i in u]
@@ -225,7 +229,7 @@ def lista_t_entre_llegadas(tiempo_simulacion):
 
     eje_y = [0] + Nt1 + [max(Nt1)]
     eje_x = [0] + horas_llegada_pacientes + [b]
-    #plt.step(eje_x, eje_y)
+    plt.step(eje_x, eje_y)
 
     # plt.hist(t_entre_llegadas)
     # plt.show()
@@ -233,17 +237,12 @@ def lista_t_entre_llegadas(tiempo_simulacion):
     return t_entre_llegadas
 
 
-
-
-
 def t_urg101003():
     # --> scale = 1/rate.
-    return np.random.gamma(shape=27.33998, scale=0.003347065)
-
+    return np.random.gamma(shape=28.1626, scale=0.0032)
 
 def t_div101703():
     return np.random.gamma(shape=2.289, scale=0.2999213)
-
 
 """ 
     opr: esta variable indica si el paciente proviene de opr
@@ -278,7 +277,6 @@ def t_div103204(u_actual=''):
     return func_pers_tpos_hosp(u_actual)
 
 
-
 def t_opr102001():
     return random.weibullvariate(2.618, 4.572)
 
@@ -305,3 +303,13 @@ def t_end():
 
 def random_gama():
     return np.random.gamma(shape=25.155, scale=4.542125)
+
+if __name__ == "__main__":
+    medias = []
+    tiempo_simulacion = 24*20
+    for i in range(100):
+        l = lista_t_entre_llegadas(tiempo_simulacion)
+        medias.append(np.mean(l))
+
+
+    breakpoint()
