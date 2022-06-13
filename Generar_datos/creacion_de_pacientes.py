@@ -10,7 +10,7 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-tiempo_simulacion = 24*30*12
+tiempo_simulacion = 24*30*12*3*3*3
 N_pacientes = round(0.13*tiempo_simulacion)
 
 
@@ -56,7 +56,7 @@ Agregando los supuestos de que todos pasan de admision al box y que de otro a sa
 """
 Matriz_procesada[0] = [0.0, 1, 0.0, 0.0, 0.0, 0.0,
                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+# Matriz_procesada[12] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 #                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 """
 Fin de agregación de supuestos

@@ -22,8 +22,8 @@ from media_movil import media_movil_ayudantia
 ESTO CAMBIA EL PERIODO 
 """
 # 24*30*72
-TRANSIENTE = 24*30*2
-SIMULANDO = 24*30*3
+TRANSIENTE = 24*30*36
+SIMULANDO = 24*30*2
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -376,8 +376,8 @@ class Simulacion:
             """
 
             recs = self.Q.get_all_records()
-            waits = [r.waiting_time for r in recs if r.arrival_date >
-                     self.transitorio and r.arrival_date < self.ultimopedazo]
+            waits = [r.waiting_time for r in recs if r.node != 13 and (r.arrival_date >
+                     self.transitorio )]
             arrival = []
 
             #
@@ -398,7 +398,7 @@ class Simulacion:
             stadisticas = {"media": np.mean(waits),
                            "sd": np.std(waits)}
             # arrival.sort()
-            # self.datos_trial.append(stadisticas)
+            self.datos_trial.append(stadisticas)
             # tiempos_entre_llegadas = [arrival[i+1]-arrival[i]
             #                          for i in range(len(arrival)-1)]
 #
