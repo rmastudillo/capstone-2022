@@ -93,16 +93,19 @@ def crear_pacientes(N_pacientes, posibilidades):
     Se estan generando los tiempos entre pacientes
     """
     tiempo_simulacion = 24*30*36
+    print("ESNTRE A ")
     l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+    print("SALI")
     generando_tiempos = True
     while generando_tiempos:
         try:
+            print("ESNTRE Al try ")
             l_tiempo_entre_llegadas[N_pacientes]
+
             generando_tiempos = False
         except:
             print("no habian suficientes pacientes generados")
             l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
-
     pacientes = []
     tiempo = 0
 
