@@ -92,6 +92,7 @@ def simulacion(configuracion, escenarios, sim=Simulacion, n_sim=0):
     except:
         configuracion = [configuracion[0]+configuracion[1], configuracion[2] + configuracion[3] + configuracion[4], configuracion[5] + configuracion[6] + configuracion[7], configuracion[8], configuracion[9] + configuracion[10] +
                          configuracion[11], configuracion[12] + configuracion[13], configuracion[14] + configuracion[15] + configuracion[16] + configuracion[17], configuracion[18] + configuracion[19] + configuracion[20], configuracion[21]]
+        configuracion = configuracion[:-1] + [0, 0, 0, 0, 0]
     sim.simular(nueva_configuracion=configuracion, rep=escenarios)
     for i in range(len(sim.historial_replicas[n_sim])):
         resultado.append(float(sim.historial_replicas[n_sim][i]["sd"]))
