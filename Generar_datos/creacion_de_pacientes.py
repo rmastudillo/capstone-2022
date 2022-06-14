@@ -10,11 +10,10 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-tiempo_simulacion = 24*30*12*3*3*3
+tiempo_simulacion = 24*30*12*5
 N_pacientes = round(0.13*tiempo_simulacion)
 
-
-N_bdd = 30
+N_bdd = 8
 
 """
 Crear carpetas
@@ -95,20 +94,17 @@ def crear_pacientes(N_pacientes, posibilidades):
     Se estan generando los tiempos entre pacientes
     """
 
-    print("ESNTRE A ")
     l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
-    print("SALI")
     generando_tiempos = True
     while generando_tiempos:
         try:
-            print("ESNTRE Al try ")
             l_tiempo_entre_llegadas[N_pacientes]
-
             generando_tiempos = False
         except:
             print("no habian suficientes pacientes generados",
                   len(l_tiempo_entre_llegadas), " < ", N_pacientes)
             l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+
     pacientes = []
     tiempo = 0
 
@@ -116,18 +112,9 @@ def crear_pacientes(N_pacientes, posibilidades):
         u_actual = 'URG101_003'
         paciente = namedtuple(
             'Paciente', ['n_recorrido', 'i_recorrido', 't_llegada', 't_atencion'])
-        # Aca, se genera un intervalo de tiempo entre llegadas, segun la hora actual
+
         tiempo = l_tiempo_entre_llegadas[_i]
         paciente.t_llegada = tiempo  # Aca, se le asigna la hora de llegada al paciente
-        # Aqui, avanzaremos la variable auxiliar de tpo actual, para decidir cuando cambiar la tasa de atencion.
-
-        # if tpo_actual_aux esta entre 00 y 6:59 am, generar tiempo con tasa x
-        # en otro caso, la otra tasa
-
-        l_tpo_pers = ['OPR102_001', 'OPR101_011', 'OPR102_003',
-                      'OPR101_033', 'DIV103_204', 'DIV101_703']
-        l_hosp = ['DIV101_603', 'DIV101_604', 'DIV102_203',
-                  'DIV103_107', 'DIV104_602', 'DIV103_204']
 
         paciente.n_recorrido = [u_actual]
         paciente.i_recorrido = [areas[u_actual][0]]
@@ -139,18 +126,7 @@ def crear_pacientes(N_pacientes, posibilidades):
                 posibilidades, u_actual)  # u_actual = OPR, sgt sala hosp
             paciente.n_recorrido.append(siguiente_destino)
             paciente.i_recorrido.append(areas[siguiente_destino][0])
-
-            if siguiente_destino in l_hosp:
-                act = u_actual
-
-                if act in l_tpo_pers:
-                    tiempo_atendido = t_atencion[siguiente_destino](act)
-
-                else:
-                    tiempo_atendido = t_atencion[siguiente_destino]()
-
-            else:
-                tiempo_atendido = t_atencion[siguiente_destino]()
+            tiempo_atendido = t_atencion[siguiente_destino]()
 
             paciente.t_atencion.append(tiempo_atendido)
             t_atencion_areas[siguiente_destino].append(tiempo_atendido)

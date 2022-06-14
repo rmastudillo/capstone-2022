@@ -7,165 +7,29 @@ import matplotlib.pyplot as plt
 from math import log
 # ejemplo
 
-
-def dist_promedio():
-    """
-    Comportamiento promedio de paciente que sale de una opr. Lo modelamos asi
-    por la falta de datos (que quedan en 0 por el end...), lo cual nos llevaria a sub estimar los tiempos.
-    Se modela segmentando la permanencia de los pacientes en:
-        1) menos de 72 hrs (3 dias), lo cual ocurre el 51% de las veces
-        2) mas de 72 hrs, lo cual representa el resto de posibilidades (entre 72 y 290 hrs)
-    """
-    p = random.random()
-    if p <= 0.51:
-        a = np.random.gamma(shape=1.33548, scale=18.86)
-        while a > float(72) or a < 0.1:
-            a = np.random.gamma(shape=1.33548, scale=18.86)
-
-        return a
-
-    else:
-        a = np.random.normal(loc=179.259, scale=45.22)
-        while a < float(72) or a > 290:
-            a = np.random.normal(loc=179.259, scale=45.22)
-
-        return a
-
-
-def dist_desde_opr_033():
-    p = random.random()
-    if p <= 0.389:
-        a = np.random.normal(loc=35.96, scale=21.34)
-        while a > 72 or a <= 1.1:
-            a = np.random.normal(loc=35.96, scale=21.34)
-
-        return a
-
-    else:
-        a = np.random.normal(loc=178.35, scale=46.88)
-        while a < 93 or a > 290:  # Sacando el min y max del intervalo
-            a = np.random.normal(loc=178.35, scale=46.88)
-
-        return a
-
-
-def dist_desde_opr102_003():
-    p = random.random()
-    if p <= 0.9:
-        a = np.random.gamma(shape=0.797, scale=14.038)
-        while a > 24 or a <= 0.05:
-            a = np.random.gamma(shape=0.797, scale=14.038)
-
-        return a
-
-    else:
-        a = np.random.normal(loc=167.61, scale=30)
-        while a < 24 or a > 210:
-            a = np.random.normal(loc=167.61, scale=30)
-        return a
-
-
-def dist_desde_div103_204():
-    p = random.random()
-    a = 0
-    if p <= 0.29:
-        while a <= 0.05 or a >= 24:  # min y max de los datos
-            a = np.random.normal(loc=12, scale=8)
-    else:
-        while a <= 90.5 or a >= 547:  # min y max de los datos
-            a = np.random.normal(loc=283, scale=189)
-    return a
-
-
-def dist_desde_div101_703():
-    p = random.random()
-    if p <= 0.24:  # prop de gente q se queda menos de 9 hrs
-        a = 0
-        while a < 0.4 or a >= 9:
-            a = np.random.lognormal(mean=0.8061370, sigma=0.6801976)
-        return a
-
-    elif p > 0.24 and p <= 0.49:
-        a = 0
-        while a < 9 or a >= 23.55:
-            a = np.random.gamma(shape=16.5012, scale=0.994)
-        return a
-
-    else:
-        a = 0
-        while a < 24 or a >= 720.0:
-            a = np.random.lognormal(mean=4.79, sigma=1.0312)
-            return a
-
-
-def dist_desde_otros_prom():
-    a = 0
-    while a < 0.1 or a > 3.5:
-        a = np.random.normal(loc=2.64, scale=1.8)
-    return a
-
-
-def func_pers_tpos_hosp(u_actual=""):
-
-    if u_actual == "OPR102_001":
-        a = dist_promedio()
-        return a
-
-    elif u_actual == 'OPR101_033':
-        a = dist_desde_opr_033()
-
-        return a
-
-    elif u_actual == "OPR102_003":
-        a = dist_desde_opr102_003()
-
-        return a
-
-    elif u_actual == "OPR101_011":
-        """
-        Dado que solo cuenta con 2 datos, asumimos que tendra distribucion promedio
-        """
-        a = dist_promedio()
-
-        return a
-
-    elif u_actual == 'DIV101_703':
-        a = dist_desde_div101_703()
-
-        return a
-
-    elif u_actual == 'DIV103_204':
-        """
-        Dado que tiene solo 7 datos, modelamos asi:
-        """
-        a = dist_desde_div103_204()
-
-        return a
-
-    else:
-        a = dist_desde_otros_prom()
-        return a
-
-
 def lista_t_entre_llegadas(tiempo_simulacion):
-    """
+    """ 
     b: el intervalo de tiempo que se simulara, (0, b]
     """
-
+    
     b = tiempo_simulacion
 
     def tasa_no_homo(t):
         hora = t % 24
         if hora >= 0 and hora <= 7:
             return 0.13677
+
         elif hora > 7 and hora <= 12:
             r = 0.02346*hora - 0.02752
             return r
+
         elif hora > 12 and hora <= 21.5:
             return 0.254
+
         else:
             r = -0.046892*hora + 1.2621
             return r
+    
     """
     Parte Homogenea:
     1) crear los intervalos y los visualizamos
@@ -174,11 +38,11 @@ def lista_t_entre_llegadas(tiempo_simulacion):
     i = 0
     y = []
     dt = []
-
+    
     while i <= b:
         pto = tasa_no_homo(i)
         y.append(pto)
-        dt.append(round(i, 3))
+        dt.append(round(i,3))
         i += 0.1
 
     """
@@ -186,11 +50,10 @@ def lista_t_entre_llegadas(tiempo_simulacion):
     m: representa el numero de datos que generaremos, el cual debe ser
        mayor que la cantidad de personas esperadas entre (0,b]
     """
-    lamda_plus = 0.254
-    # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
-    m = round(lamda_plus*b*3)
-
-    u = np.random.uniform(0, 1, m)
+    lamda_plus = 0.254 
+    m = round(lamda_plus*b*3) # hacemos un numero que sea mas grande que el valor esperado de pacientes al dia.
+    
+    u = np.random.uniform(0,1,m)
     t = [round((-1/lamda_plus)*log(i), 3) for i in u]
 
     p = 0
@@ -203,7 +66,7 @@ def lista_t_entre_llegadas(tiempo_simulacion):
     s2 = [n for n in s1 if n <= b]
     nstar = len(s2)
 
-    w = np.random.uniform(0, 1, size=nstar)
+    w = np.random.uniform(0,1,size = nstar)
 
     lol = []
     t_entre_llegadas = []
@@ -218,6 +81,7 @@ def lista_t_entre_llegadas(tiempo_simulacion):
         lol.append(bul)
         if bul:
             t_entre_llegadas.append(t[i])
+            
 
     ind = [i*1 for i in lol]
 
@@ -242,10 +106,8 @@ def t_urg101003():
     # --> scale = 1/rate.
     return np.random.gamma(shape=28.1626, scale=0.0032)
 
-
 def t_div101703():
     return np.random.gamma(shape=2.289, scale=0.2999213)
-
 
 """ 
     opr: esta variable indica si el paciente proviene de opr
@@ -254,55 +116,94 @@ def t_div101703():
     
 """
 
+def t_div101603():
+    p = round(np.random.uniform(low= 48.27, high=483.05), 4)
+    return p
 
-def t_div101603(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
-
-
-def t_div101604(u_actual=''):
-
-    return func_pers_tpos_hosp(u_actual)
-
+def t_div101604():
+    p = round(np.random.uniform(low= 6.45, high= 420), 4)
+    return p
 
 def t_div102203(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
+    prob = random.random()
+    p = 0
+    if prob <= 0.853:
+        while p < 1 or p > 51:
+            p = round(np.random.gamma(shape = 0.953, scale = 9.75), 4)
+            
+    else:
+        while p < 133 or p > 291:
+            p = round(np.random.uniform(low= 133.55, high=  239.90), 4)
 
+    return p
 
-def t_div103107(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
+def t_div103107():
+    prob = random.random()
+    p = 0
 
+    if prob <= 0.364:
+        while p < 3.48 or p > 25.2:
+            p = round(np.random.gamma(shape = 1.483, scale = 6.374 ), 4)
 
-def t_div104602(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
+    else:
+        while p < 100 or p > 690:
+            p = round(np.random.uniform(low= 117.6833, high = 691.35), 4)
 
+    return p
 
-def t_div103204(u_actual=''):
-    return func_pers_tpos_hosp(u_actual)
+def t_div103204():
+    prob = random.random()
+    p = 0
 
+    if prob <= 0.45:
+        while p < 0.1 or p > 24:
+            p = round(np.random.gamma(shape = 1.096, scale = 9.04 ), 4)
+            
+    elif prob > 0.45 and prob <= 0.63:
+        while p <= 24 or p >= 47.37:
+            p = round(np.random.uniform(low= 24.3, high=  47.37), 4)
+
+    else:
+        while p < 48 or p >= 400:
+            p = round(random.weibullvariate(alpha = 172.61, beta = 2.071))
+
+    return p
+
+def t_div104602():
+    prob = random.random()
+    p = 0
+
+    if prob <= 0.4:
+        while p <0.6 or p >51:
+            p = round(np.random.uniform(low= 0.6, high=  50.8), 4)
+
+    else:
+        while p < 90 or p > 572:
+            p = round(random.weibullvariate(alpha = 360.9318, beta = 2.1249))
+
+    return p
 
 def t_opr102001():
     return random.weibullvariate(2.618, 4.572)
 
-
 def t_opr101011():
     return random.weibullvariate(alpha=2.546, beta=4.644)
-
 
 def t_opr102003():
     return random.weibullvariate(2.678, 5.733)
 
-
 def t_opr101033():
     return random.weibullvariate(2.67, 5.37)
-
 
 def t_otro():
     return 0
 
-
 def t_end():
     return 0
 
-
 def random_gama():
     return np.random.gamma(shape=25.155, scale=4.542125)
+
+
+
+    breakpoint()

@@ -22,8 +22,8 @@ from media_movil import media_movil_ayudantia
 ESTO CAMBIA EL PERIODO 
 """
 # 24*30*72
-TRANSIENTE = 24*30*36
-SIMULANDO = 24*30*2
+TRANSIENTE = 24*30*24
+SIMULANDO = 24*30*1
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -367,6 +367,7 @@ class Simulacion:
             recs = self.Q.get_all_records()
             waits = [r.waiting_time for r in recs if r.node != 13 and (r.arrival_date >
                      self.transitorio)]
+
             for i in range(1, 13):
                 waits_i = [r.waiting_time for r in recs if r.node ==
                            i and (r.arrival_date > self.transitorio)]
@@ -403,8 +404,8 @@ class Simulacion:
 #
             print("TERMINE LA ITERACION, simiule ",
                   self.tiempo_total, " horas")
-            """
-            for i in range(13):
+
+            for i in range(1, 13):
                 try:
                     a = [(r.id_number, r.waiting_time)
                          for r in recs if r.node == i]
@@ -414,7 +415,7 @@ class Simulacion:
                     print("NODO ", i, "media =", b, "desviacion", c)
                 except:
                     continue
-            """
+            breakpoint()
             print("TERMINE LA ITERACION")
 
         """
@@ -559,17 +560,16 @@ class Simulacion:
         breakpoint()
 
 
-
 # sim.transciente()
 
 # sim.transciente()
 # breakpoint()
-
-
 
 
 # Una nueva simulacion NO DEBE TENER INI
 #recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()
 #print(sim.mean, sim.sd)
-# breakpoint()
+sim = Simulacion()
+sim.simular()
+breakpoint()

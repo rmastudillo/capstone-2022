@@ -1,9 +1,11 @@
 import pandas as pd
 import csv
 from collections import defaultdict
+import os
+my_path = os.path.abspath(os.path.dirname(__file__))
 
 data_original = pd.read_csv(
-    'pacientes_generados.csv', encoding='UTF-8', sep=',')
+    my_path+'/Pacientes_old/pacientes_generados_0.csv', encoding='UTF-8', sep=',')
 data = data_original.copy()
 # Cambiamos el nombre de las columnas del archivo datos
 data.columns = ['Case ID', 'Area', 'Num_area']
