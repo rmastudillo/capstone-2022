@@ -1,4 +1,6 @@
 from pydoc import cram
+
+from matplotlib import scale
 from cargar_matriz import Matriz_procesada
 from collections import namedtuple
 from random import choices
@@ -10,10 +12,10 @@ import os
 Cada vez que se corra este codigo se van a crear dos archivos con los pacientes simulados
 N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivos con N_pacientes generados
 """
-tiempo_simulacion = 24*30*12*5
-N_pacientes = round(0.13*tiempo_simulacion)
+tiempo_simulacion = 24*30*12*7
+N_pacientes = round(0.34*tiempo_simulacion)
 
-N_bdd = 8
+N_bdd = 15
 
 """
 Crear carpetas
@@ -94,7 +96,8 @@ def crear_pacientes(N_pacientes, posibilidades):
     Se estan generando los tiempos entre pacientes
     """
 
-    l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+    l_tiempo_entre_llegadas = np.random.exponential(
+        scale=2.6, size=N_pacientes+1)
     generando_tiempos = True
     while generando_tiempos:
         try:
@@ -103,7 +106,8 @@ def crear_pacientes(N_pacientes, posibilidades):
         except:
             print("no habian suficientes pacientes generados",
                   len(l_tiempo_entre_llegadas), " < ", N_pacientes)
-            l_tiempo_entre_llegadas = lista_t_entre_llegadas(tiempo_simulacion)
+            l_tiempo_entre_llegadas = np.random.exponential(
+                scale=0.341, size=N_pacientes+1)
 
     pacientes = []
     tiempo = 0

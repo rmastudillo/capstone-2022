@@ -22,8 +22,8 @@ from media_movil import media_movil_ayudantia
 ESTO CAMBIA EL PERIODO 
 """
 # 24*30*72
-TRANSIENTE = 24*30*24
-SIMULANDO = 24*30*1
+TRANSIENTE = 24*30*12
+SIMULANDO = 24*30*10
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -409,13 +409,16 @@ class Simulacion:
                 try:
                     a = [(r.id_number, r.waiting_time)
                          for r in recs if r.node == i]
-                    b = np.mean([r.service_time for r in recs if r.node == i])
-                    c = np.std([r.service_time for r in recs if r.node == i])
+                    #print(i, a)
+                    b = np.mean([r.waiting_time for r in recs if (r.node ==
+                                i) and (r.arrival_date > self.transitorio)])
+                    c = np.std([r.waiting_time for r in recs if r.node ==
+                               i and (r.arrival_date > self.transitorio)])
                     a.sort(key=lambda x: x[0])
                     print("NODO ", i, "media =", b, "desviacion", c)
                 except:
                     continue
-            breakpoint()
+            # breakpoint()
             print("TERMINE LA ITERACION")
 
         """
@@ -505,8 +508,8 @@ class Simulacion:
         Grafica el tiempo transciente 
         """
         Y_i_j = []
-        total_replica = 15
-        dias_sim = 30*12  # dias
+        total_replica = 1
+        dias_sim = 30*12*2  # dias
         t = 24
         tiempo_simulando = t
         for trial in range(total_replica):
@@ -526,10 +529,7 @@ class Simulacion:
             Parametro N que es la estructura
             """
             self.Q = ciw.Simulation(self.N,
-                                    node_class=[ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                                ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                                ciw.PSNode, ciw.PSNode, ciw.PSNode, ciw.PSNode,
-                                                ciw.PSNode],
+                                    node_class=ciw.Node,
                                     tracker=trackers.NodePopulationSubset([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), exact=5)
             """
             Se simula hasta tiempo_total
@@ -543,11 +543,16 @@ class Simulacion:
                 waits = []
                 recs = self.Q.get_all_records()
                 for r in recs:
-                    if (r.node != 14 and r.node != 13):
-                        waits.append(r.waiting_time)
+                    if (r.node in range(3, 9, 1)):
+                        if r.arrival_date >= (_i-1)*23:
+                            waits.append(r.waiting_time)
 
                 # mi f(y) es el tiempo medio
-                Y_i.append(np.mean(waits))
+                try:
+                    waits[0]
+                    Y_i.append(np.mean(waits))
+                except:
+                    Y_i.append(0)
                 tiempo_simulando += t  # simulo otro día
             tiempo_simulando = t
             Y_i_j.append(Y_i)
@@ -570,6 +575,7 @@ class Simulacion:
 #recs = sim.Q.get_all_records()
 # sim.tem_por_nodo()
 #print(sim.mean, sim.sd)
-sim = Simulacion()
-sim.simular()
-breakpoint()
+#sim = Simulacion()
+# sim.transciente()
+# sim.simular()
+# breakpoint()
