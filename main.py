@@ -23,7 +23,7 @@ ESTO CAMBIA EL PERIODO
 """
 # 24*30*72
 TRANSIENTE = 24*30*12
-SIMULANDO = 24*30*10
+SIMULANDO = 24*30*3
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -143,8 +143,8 @@ class Simulacion:
     no se considera en la recolección de datos
     """
 
-    base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-    #base = [5, 8, 8, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
+    #base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
+    base = [5, 8, 13, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
 
     """
     Datos:
@@ -321,7 +321,7 @@ class Simulacion:
                                 node_class=ciw.Node,
                                 tracker=trackers.SystemPopulation(), exact=5)
 
-    def simular(self, nueva_configuracion=np.zeros(13), ini=0, rep=2):
+    def simular(self, nueva_configuracion=np.zeros(13), ini=0, rep=10):
         """
         Defino la estructura a simular
         """
@@ -566,9 +566,11 @@ class Simulacion:
 
 
 # sim.transciente()
-
+sim = Simulacion()
 # sim.transciente()
-# breakpoint()
+sim.simular()
+sim.printd(sim.historial_replicas_nodos[0])
+breakpoint()
 
 
 # Una nueva simulacion NO DEBE TENER INI
