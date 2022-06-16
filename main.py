@@ -23,7 +23,7 @@ ESTO CAMBIA EL PERIODO
 """
 # 24*30*72
 TRANSIENTE = 24*30*12
-SIMULANDO = 24*30*3
+SIMULANDO = 24*30*5
 
 """
 ESTO CAMBIA EL PERIODO 
@@ -143,8 +143,8 @@ class Simulacion:
     no se considera en la recolección de datos
     """
 
-    #base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
-    base = [5, 8, 13, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
+    base = [3, 5, 5, 12, 8, 14, 10, 12, 2, 2, 2, 2, 1]
+    #base = [5, 8, 13, 13, 11, 16, 13, 15, 2, 2, 2, 2, 1]
 
     """
     Datos:
