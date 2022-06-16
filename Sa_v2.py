@@ -35,12 +35,12 @@ for i in range(len(factibless)):
 
 def factos(conf, fact):
     conf = tuple(conf)
-    print(conf)
-    print(len(fact), len(fact[0]))
-    breakpoint()
+    # print(conf)
+    #print(len(fact), len(fact[0]))
+    # breakpoint()
     for i in range(len(fact)):
-        print(i)
-        print(fact[i])
+        # print(i)
+        # print(fact[i])
         if conf in fact[i]:
             return True
     return False

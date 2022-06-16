@@ -1,18 +1,9 @@
-from bdb import Breakpoint
 from collections import defaultdict
-from email.policy import default
-from reprlib import recursive_repr
-from statistics import NormalDist
-from tkinter.ttk import Progressbar
 import ciw
 from ciw import trackers
 from matplotlib import pyplot as plt
-from funcion_generadora_data import generacion_data_replica_n
-import random
 import numpy as np
 import pandas as pd
-from optparse import OptionParser
-import inspect
 import ast
 import os
 from media_movil import media_movil_ayudantia
@@ -565,12 +556,13 @@ class Simulacion:
         breakpoint()
 
 
+
 # sim.transciente()
-sim = Simulacion()
+#sim = Simulacion()
 # sim.transciente()
-sim.simular()
-sim.printd(sim.historial_replicas_nodos[0])
-breakpoint()
+#sim.simular()
+#sim.printd(sim.historial_replicas_nodos[0])
+#breakpoint()
 
 
 # Una nueva simulacion NO DEBE TENER INI

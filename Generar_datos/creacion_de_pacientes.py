@@ -15,7 +15,7 @@ N_pacientes es el numero de pacientes a generar, N_datos es el Numero de archivo
 tiempo_simulacion = 24*30*12*7
 N_pacientes = round(0.34*tiempo_simulacion)
 
-N_bdd = 15
+N_bdd = 50
 
 """
 Crear carpetas
