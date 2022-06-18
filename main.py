@@ -558,7 +558,7 @@ class Simulacion:
 
 
 # sim.transciente()
-#sim = Simulacion()
+sim = Simulacion()
 # sim.transciente()
 #sim.simular()
 #sim.printd(sim.historial_replicas_nodos[0])
@@ -571,5 +571,5 @@ class Simulacion:
 #print(sim.mean, sim.sd)
 #sim = Simulacion()
 # sim.transciente()
-# sim.simular()
+sim.simular()
 # breakpoint()
